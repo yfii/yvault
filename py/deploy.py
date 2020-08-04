@@ -89,14 +89,13 @@ def deploy():
     yVault_instance,
     strategyYfii_instance,
 ) = deploy()
+from_0 = w3.eth.accounts[0]
+from_1 = w3.eth.accounts[1]
+from_2 = w3.eth.accounts[2]
 
 
 def run():
-
-    from_0 = w3.eth.accounts[0]
-    from_1 = w3.eth.accounts[1]
-    from_2 = w3.eth.accounts[2]
-    setup(yfii_instance, token_instance, from_0, from_1, from_2, yVault_instance)
+    setup()
 
     # from_1 depost
     w3.eth.defaultAccount = from_1
@@ -107,12 +106,14 @@ def run():
         token_instance.functions.balanceOf(yVault_instance.address).call()
         == deposit_balance
     )
-    total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call()
-    assert [total_stake,total_out,earnings_per_share] == [deposit_balance,0,0]
+    total_stake, total_out, earnings_per_share = yVault_instance.functions.global_(
+        0
+    ).call()
+    assert [total_stake, total_out, earnings_per_share] == [deposit_balance, 0, 0]
 
     # 检查 用户存入情况
     stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
-    assert [stake, payout, total_out] == [deposit_balance,0,0]
+    assert [stake, payout, total_out] == [deposit_balance, 0, 0]
 
     # cal_out
     assert yVault_instance.functions.cal_out(from_1).call() == 0
@@ -127,16 +128,21 @@ def run():
     )
 
     ##TODO:
-    _earnings_per_share = earnings_per_share+(make_profit_balance*1e22/total_stake)
+    _earnings_per_share = earnings_per_share + (
+        make_profit_balance * 1e22 / total_stake
+    )
     _earnings_per_share = int(_earnings_per_share)
-    total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call()
-    assert([total_stake,total_out,earnings_per_share]==[deposit_balance,make_profit_balance,_earnings_per_share])
-    
-    # assert total_out == deposit_balance
-    # assert earnings_per_share==1
+    total_stake, total_out, earnings_per_share = yVault_instance.functions.global_(
+        0
+    ).call()
+    assert [total_stake, total_out, earnings_per_share] == [
+        deposit_balance,
+        make_profit_balance,
+        _earnings_per_share,
+    ]
 
 
-def setup(yfii_instance, token_instance, from_0, from_1, from_2, yVault_instance):
+def setup():
 
     w3.eth.defaultAccount = from_0
     ## yfii mint to from_0
