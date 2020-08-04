@@ -299,14 +299,14 @@ contract yVault is ERC20 {
     }
     mapping(uint256 => Global) public global_; // (global => data) global data
 
-  IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+//   IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
 
-  modifier discountCHI {
-    uint256 gasStart = gasleft();
-    _;
-    uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
-    chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
-    }
+//   modifier discountCHI {
+//     uint256 gasStart = gasleft();
+//     _;
+//     uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
+//     chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
+//     }
 
 
   constructor (address _token, address _controller) public {
@@ -342,7 +342,7 @@ contract yVault is ERC20 {
       return token.balanceOf(address(this)).mul(min).div(max);
   }
   
-  function earn() public discountCHI{
+  function earn() public {
       uint _bal = available();
       token.safeTransfer(controller, _bal);
       Controller(controller).earn(address(token), _bal);
@@ -364,7 +364,7 @@ contract yVault is ERC20 {
   }
 
   // No rebalance implementation for lower fees and faster swaps
-  function withdraw(uint amount) external discountCHI{
+  function withdraw(uint amount) external {
       claim();//先领取分红.
       require(amount>=plyr_[msg.sender].stake,"!balance");
       uint r = amount;
