@@ -176,12 +176,13 @@ def random_deposit():
     deposit_balance = random.randint(1000, pow(2, 75))
     yVault_instance.functions.deposit(deposit_balance).transact()
 
+
 def random_withdraw():
     w3.eth.defaultAccount = from_1
 
     stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
     # print(from_1,[stake, payout, total_out])
-    withdraw_balance = random.randint(1, stake//2)
+    withdraw_balance = random.randint(1, stake // 2)
     yVault_instance.functions.withdraw(withdraw_balance).transact()
 
     w3.eth.defaultAccount = from_2
@@ -189,8 +190,9 @@ def random_withdraw():
     stake, payout, total_out = yVault_instance.functions.plyr_(from_2).call()
     # print(from_2,[stake, payout, total_out])
 
-    withdraw_balance = random.randint(1, stake//2)
+    withdraw_balance = random.randint(1, stake // 2)
     yVault_instance.functions.withdraw(withdraw_balance).transact()
+
 
 def random_make_profit():
     w3.eth.defaultAccount = from_0
@@ -204,9 +206,52 @@ def claim():
     w3.eth.defaultAccount = from_2
     yVault_instance.functions.claim().transact()
 
+
 def check():
-    '最后检查各种分红是否正常...'
+    """
+    最后检查各种分红是否正常...
+
+    先claim的话
+    那么理论上 yVault_instance上的yfii余额为0
+    from_0+from_1+from_2的yfii 余额加起来为初始余额
+
+    token的话，余额会到 yVault_instance 上面
+    yVault_instance+from_1+from_2 的token 余额加起来为初始*2
+
+    
+
+
+    """
+    init_balance = w3.toWei(str(pow(2, 100)), "ether")  # 初始化的余额
     claim()
+
+    assert yfii_instance.functions.balanceOf(yVault_instance.address).call() == 0
+
+    assert (
+        yfii_instance.functions.balanceOf(from_0).call()
+        + yfii_instance.functions.balanceOf(from_1).call()
+        + yfii_instance.functions.balanceOf(from_2).call()
+        == init_balance
+    )
+    assert (
+        token_instance.functions.balanceOf(yVault_instance.address).call()
+        + token_instance.functions.balanceOf(from_1).call()
+        + token_instance.functions.balanceOf(from_2).call()
+        == init_balance * 2
+    )
+
+    stake1, payout1, total_out1 = yVault_instance.functions.plyr_(from_1).call()
+
+    stake2, payout2, total_out2 = yVault_instance.functions.plyr_(from_2).call()
+
+    assert (
+        stake1 + stake2
+        == token_instance.functions.balanceOf(yVault_instance.address).call()
+    )
+
+    assert total_out1 == yfii_instance.functions.balanceOf(from_1).call()
+    assert total_out2 == yfii_instance.functions.balanceOf(from_2).call()
+
 
 def setup():
 
