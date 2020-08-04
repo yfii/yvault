@@ -309,9 +309,9 @@ contract yVault is ERC20 {
 //     }
 
 
-  constructor (address _token, address _controller) public {
+  constructor (address _token, address _controller,address _yfiiaddress) public {
       token = IERC20(_token);
-      Yfiitoken = IERC20(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+      Yfiitoken = IERC20(_yfiiaddress);
       governance = msg.sender;
       controller = _controller;
   }
