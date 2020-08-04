@@ -82,14 +82,16 @@ def deploy():
     )
 
 
+(
+    yfii_instance,
+    token_instance,
+    controller_instance,
+    yVault_instance,
+    strategyYfii_instance,
+) = deploy()
+
+
 def run():
-    (
-        yfii_instance,
-        token_instance,
-        controller_instance,
-        yVault_instance,
-        strategyYfii_instance,
-    ) = deploy()
 
     from_0 = w3.eth.accounts[0]
     from_1 = w3.eth.accounts[1]
@@ -105,12 +107,12 @@ def run():
         token_instance.functions.balanceOf(yVault_instance.address).call()
         == deposit_balance
     )
+    total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call()
+    assert [total_stake,total_out,earnings_per_share] == [deposit_balance,0,0]
 
     # 检查 用户存入情况
     stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
-    assert stake == deposit_balance
-    assert payout == 0
-    assert total_out == 0
+    assert [stake, payout, total_out] == [deposit_balance,0,0]
 
     # cal_out
     assert yVault_instance.functions.cal_out(from_1).call() == 0
@@ -118,13 +120,20 @@ def run():
     # make_profit
     w3.eth.defaultAccount = from_0
     make_profit_balance = w3.toWei("1", "ether")
-    yVault_instance.functions.make_profit(make_profit_balance).transact()     
+    yVault_instance.functions.make_profit(make_profit_balance).transact()
+    assert (
+        yfii_instance.functions.balanceOf(yVault_instance.address).call()
+        == make_profit_balance
+    )
 
     ##TODO:
-    total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call() 
-    assert total_stake == deposit_balance
-    assert total_out == deposit_balance
-    assert earnings_per_share==1
+    _earnings_per_share = earnings_per_share+(make_profit_balance*1e18/total_stake/1e18)
+    total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call()
+    print(_earnings_per_share,earnings_per_share)
+    assert([total_stake,total_out,earnings_per_share]==[deposit_balance,make_profit_balance,_earnings_per_share])
+    
+    # assert total_out == deposit_balance
+    # assert earnings_per_share==1
 
 
 def setup(yfii_instance, token_instance, from_0, from_1, from_2, yVault_instance):
@@ -145,21 +154,21 @@ def setup(yfii_instance, token_instance, from_0, from_1, from_2, yVault_instance
     assert token_instance.functions.balanceOf(from_1).call() == mint_balance
     assert token_instance.functions.balanceOf(from_2).call() == mint_balance
 
-    ## approve  
+    ## approve
     approve_balance = w3.toWei(str(pow(2, 100) - 1), "ether")
 
-    ## yfii: from_0 approve to yVault_instance 
+    ## yfii: from_0 approve to yVault_instance
     yfii_instance.functions.approve(
         yVault_instance.address, approve_balance
     ).transact()  ## make_profit
 
-    ## token: from_1 approve to yVault_instance 
+    ## token: from_1 approve to yVault_instance
     w3.eth.defaultAccount = from_1
     token_instance.functions.approve(
         yVault_instance.address, approve_balance
     ).transact()  ## deposit
 
-    ## token: from_2 approve to yVault_instance 
+    ## token: from_2 approve to yVault_instance
     w3.eth.defaultAccount = from_2
     token_instance.functions.approve(
         yVault_instance.address, approve_balance
