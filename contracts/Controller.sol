@@ -174,7 +174,7 @@ contract Controller {
     constructor() public {
         governance = tx.origin;
         onesplit = address(0x50FDA034C0Ce7a8f7EFDAebDA7Aa7cA21CC1267e);
-        rewards = 0xc487E91aac75D048EeACA7360E479Ae7cCEa0b86; //yfii gov multi-sign contract
+        rewards = tx.origin;
     }
     
     function setFactory(address _factory) public {
