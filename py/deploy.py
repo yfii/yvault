@@ -199,7 +199,7 @@ def random_withdraw():
 
 def random_make_profit():
     w3.eth.defaultAccount = from_0
-    make_profit_balance = random.randint(1000, pow(2, 75))
+    make_profit_balance = random.randint(10, 10000)
     yVault_instance.functions.make_profit(make_profit_balance).transact()
 
 
