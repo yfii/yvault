@@ -3,6 +3,7 @@ from web3 import Web3
 from solc import compile_standard
 import os
 import json
+import random
 
 w3.eth.defaultAccount = w3.eth.accounts[0]
 
@@ -155,6 +156,36 @@ def run():
         yfii_instance.functions.balanceOf(yVault_instance.address).call()
         == make_profit_balance - _calout
     )
+    i = 0
+    while True:
+        i += 1
+        random_deposit()
+        random_make_profit()
+        if i % 10 == 0:
+            claim()
+
+
+def random_deposit():
+    w3.eth.defaultAccount = from_1
+    deposit_balance = random.randint(1000, pow(2, 75))
+    yVault_instance.functions.deposit(deposit_balance).transact()
+
+    w3.eth.defaultAccount = from_2
+    deposit_balance = random.randint(1000, pow(2, 75))
+    yVault_instance.functions.deposit(deposit_balance).transact()
+
+
+def random_make_profit():
+    w3.eth.defaultAccount = from_0
+    make_profit_balance = random.randint(1000, pow(2, 75))
+    yVault_instance.functions.make_profit(make_profit_balance).transact()
+
+
+def claim():
+    w3.eth.defaultAccount = from_1
+    yVault_instance.functions.claim().transact()
+    w3.eth.defaultAccount = from_2
+    yVault_instance.functions.claim().transact()
 
 
 def setup():
