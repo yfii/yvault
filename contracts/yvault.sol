@@ -355,7 +355,7 @@ contract yVault is ERC20 {
             plyr_[msg.sender].payout = 0;
         } else {
             plyr_[msg.sender].payout = plyr_[msg.sender].payout.add(
-                global_[0].earnings_per_share.mul(amount)
+                global_[0].earnings_per_share.mul(amount).div(1e22)
             );
         }
         global_[0].total_stake = global_[0].total_stake.add(amount);
@@ -382,7 +382,7 @@ contract yVault is ERC20 {
       }
 
       plyr_[msg.sender].payout = plyr_[msg.sender].payout.sub(
-            global_[0].earnings_per_share.mul(amount)
+            global_[0].earnings_per_share.mul(amount).div(1e22)
       );
       plyr_[msg.sender].stake = plyr_[msg.sender].stake.sub(amount);
       global_[0].total_stake = global_[0].total_stake.sub(amount);
@@ -393,12 +393,12 @@ contract yVault is ERC20 {
     function make_profit(uint256 amount) public { //给yvault 打分红
         Yfiitoken.safeTransferFrom(msg.sender, address(this), amount);
         global_[0].earnings_per_share = global_[0].earnings_per_share.add(
-            amount.mul(1e18).div(global_[0].total_stake).div(1e18)
+            amount.mul(1e22).div(global_[0].total_stake)
         );
         global_[0].total_out = global_[0].total_out.add(amount);
     }
     function cal_out(address user) public view returns (uint256) { 
-        uint256 _cal = global_[0].earnings_per_share.mul(plyr_[user].stake);
+        uint256 _cal = global_[0].earnings_per_share.mul(plyr_[user].stake).div(1e22);
         if (_cal < plyr_[user].payout) {
             return 0;
         } else {
@@ -407,7 +407,7 @@ contract yVault is ERC20 {
     }
     function claim() public { //领取分红
         uint256 out = cal_out(msg.sender);
-        plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake);
+        plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(1e22);
         plyr_[msg.sender].total_out = plyr_[msg.sender].total_out.add(out);
         if (out > 0) {
             Yfiitoken.safeTransfer(msg.sender, out);

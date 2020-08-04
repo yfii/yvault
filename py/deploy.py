@@ -127,9 +127,9 @@ def run():
     )
 
     ##TODO:
-    _earnings_per_share = earnings_per_share+(make_profit_balance*1e18/total_stake/1e18)
+    _earnings_per_share = earnings_per_share+(make_profit_balance*1e22/total_stake)
+    _earnings_per_share = int(_earnings_per_share)
     total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call()
-    print(_earnings_per_share,earnings_per_share)
     assert([total_stake,total_out,earnings_per_share]==[deposit_balance,make_profit_balance,_earnings_per_share])
     
     # assert total_out == deposit_balance
