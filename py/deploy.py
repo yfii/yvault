@@ -165,6 +165,9 @@ def run():
             claim()
         if i % 10 == 0:
             random_withdraw()
+        if i>=10000:
+            break
+    check()
 
 
 def random_deposit():
