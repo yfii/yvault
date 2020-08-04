@@ -161,8 +161,10 @@ def run():
         i += 1
         random_deposit()
         random_make_profit()
-        if i % 10 == 0:
+        if i % 20 == 0:
             claim()
+        if i % 10 == 0:
+            random_withdraw()
 
 
 def random_deposit():
@@ -174,6 +176,21 @@ def random_deposit():
     deposit_balance = random.randint(1000, pow(2, 75))
     yVault_instance.functions.deposit(deposit_balance).transact()
 
+def random_withdraw():
+    w3.eth.defaultAccount = from_1
+
+    stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
+    # print(from_1,[stake, payout, total_out])
+    withdraw_balance = random.randint(1, stake//2)
+    yVault_instance.functions.withdraw(withdraw_balance).transact()
+
+    w3.eth.defaultAccount = from_2
+
+    stake, payout, total_out = yVault_instance.functions.plyr_(from_2).call()
+    # print(from_2,[stake, payout, total_out])
+
+    withdraw_balance = random.randint(1, stake//2)
+    yVault_instance.functions.withdraw(withdraw_balance).transact()
 
 def random_make_profit():
     w3.eth.defaultAccount = from_0
@@ -187,6 +204,9 @@ def claim():
     w3.eth.defaultAccount = from_2
     yVault_instance.functions.claim().transact()
 
+def check():
+    '最后检查各种分红是否正常...'
+    claim()
 
 def setup():
 
