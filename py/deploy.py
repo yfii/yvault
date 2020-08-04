@@ -73,6 +73,98 @@ def deploy():
     assert yVault_instance.functions.Yfiitoken().call() == yfii_instance.address
     assert yVault_instance.functions.token().call() == token_instance.address
 
+    return (
+        yfii_instance,
+        token_instance,
+        controller_instance,
+        yVault_instance,
+        strategyYfii_instance,
+    )
+
+
+def run():
+    (
+        yfii_instance,
+        token_instance,
+        controller_instance,
+        yVault_instance,
+        strategyYfii_instance,
+    ) = deploy()
+
+    from_0 = w3.eth.accounts[0]
+    from_1 = w3.eth.accounts[1]
+    from_2 = w3.eth.accounts[2]
+    setup(yfii_instance, token_instance, from_0, from_1, from_2, yVault_instance)
+
+    # from_1 depost
+    w3.eth.defaultAccount = from_1
+    deposit_balance = w3.toWei("1000", "ether")
+    yVault_instance.functions.deposit(deposit_balance).transact()
+    # 检查 yVault的余额情况
+    assert (
+        token_instance.functions.balanceOf(yVault_instance.address).call()
+        == deposit_balance
+    )
+
+    # 检查 用户存入情况
+    stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
+    assert stake == deposit_balance
+    assert payout == 0
+    assert total_out == 0
+
+    # cal_out
+    assert yVault_instance.functions.cal_out(from_1).call() == 0
+
+    # make_profit
+    w3.eth.defaultAccount = from_0
+    make_profit_balance = w3.toWei("1", "ether")
+    yVault_instance.functions.make_profit(make_profit_balance).transact()     
+
+    ##TODO:
+    total_stake,total_out,earnings_per_share = yVault_instance.functions.global_(0).call() 
+    assert total_stake == deposit_balance
+    assert total_out == deposit_balance
+    assert earnings_per_share==1
+
+
+def setup(yfii_instance, token_instance, from_0, from_1, from_2, yVault_instance):
+
+    w3.eth.defaultAccount = from_0
+    ## yfii mint to from_0
+    yfii_instance.functions.addMinter(from_0).transact()
+    mint_balance = w3.toWei(str(pow(2, 100)), "ether")
+    yfii_instance.functions.mint(from_0, mint_balance).transact()
+
+    assert yfii_instance.functions.balanceOf(from_0).call() == mint_balance
+
+    ## token mint to from_1,from_2
+    token_instance.functions.addMinter(from_0).transact()
+    token_instance.functions.mint(from_1, mint_balance).transact()
+    token_instance.functions.mint(from_2, mint_balance).transact()
+
+    assert token_instance.functions.balanceOf(from_1).call() == mint_balance
+    assert token_instance.functions.balanceOf(from_2).call() == mint_balance
+
+    ## approve  
+    approve_balance = w3.toWei(str(pow(2, 100) - 1), "ether")
+
+    ## yfii: from_0 approve to yVault_instance 
+    yfii_instance.functions.approve(
+        yVault_instance.address, approve_balance
+    ).transact()  ## make_profit
+
+    ## token: from_1 approve to yVault_instance 
+    w3.eth.defaultAccount = from_1
+    token_instance.functions.approve(
+        yVault_instance.address, approve_balance
+    ).transact()  ## deposit
+
+    ## token: from_2 approve to yVault_instance 
+    w3.eth.defaultAccount = from_2
+    token_instance.functions.approve(
+        yVault_instance.address, approve_balance
+    ).transact()  ## deposit
+
 
 if __name__ == "__main__":
-    deploy()
+    run()
