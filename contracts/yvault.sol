@@ -366,7 +366,7 @@ contract yVault is ERC20 {
   // No rebalance implementation for lower fees and faster swaps
   function withdraw(uint amount) external {
       claim();//先领取分红.
-      require(amount>=plyr_[msg.sender].stake,"!balance");
+      require(amount<=plyr_[msg.sender].stake,"!balance");
       uint r = amount;
 
       // Check balance
