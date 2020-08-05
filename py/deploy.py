@@ -4,6 +4,20 @@ from solc import compile_standard
 import os
 import json
 import random
+import decimal
+
+ctx = decimal.Context()
+ctx.prec = 30
+
+
+def float_to_str(f):
+    """
+    Convert the given float to a string,
+    without resorting to scientific notation
+    """
+    d1 = ctx.create_decimal(repr(f))
+    return format(d1, "f")
+
 
 w3.eth.defaultAccount = w3.eth.accounts[0]
 
@@ -128,9 +142,8 @@ def run():
         == make_profit_balance
     )
 
-    ##TODO:
     _earnings_per_share = earnings_per_share + (
-        make_profit_balance * 1e22 / total_stake
+        int(float_to_str(make_profit_balance*2**128  / total_stake))
     )
     _earnings_per_share = int(_earnings_per_share)
     total_stake, total_out, earnings_per_share = yVault_instance.functions.global_(
@@ -141,8 +154,8 @@ def run():
         make_profit_balance,
         _earnings_per_share,
     ]
-    ## 算出应该领取的分红
-    _calout = earnings_per_share * stake / 1e22 - payout
+    # 算出应该领取的分红
+    _calout = int(float_to_str(earnings_per_share * stake/2**128 )) - payout
     assert yVault_instance.functions.cal_out(from_1).call() == make_profit_balance
 
     # 领取分红
@@ -159,13 +172,14 @@ def run():
     i = 0
     while True:
         i += 1
+        print(i)
         random_deposit()
         random_make_profit()
         if i % 20 == 0:
             claim()
         if i % 10 == 0:
             random_withdraw()
-        if i>=10000:
+        if i >= 10000:
             break
     check()
 
@@ -184,14 +198,14 @@ def random_withdraw():
     w3.eth.defaultAccount = from_1
 
     stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
-    # print(from_1,[stake, payout, total_out])
+    print(from_1,[stake, payout, total_out])
     withdraw_balance = random.randint(1, stake // 2)
     yVault_instance.functions.withdraw(withdraw_balance).transact()
 
     w3.eth.defaultAccount = from_2
 
     stake, payout, total_out = yVault_instance.functions.plyr_(from_2).call()
-    # print(from_2,[stake, payout, total_out])
+    print(from_2,[stake, payout, total_out])
 
     withdraw_balance = random.randint(1, stake // 2)
     yVault_instance.functions.withdraw(withdraw_balance).transact()
