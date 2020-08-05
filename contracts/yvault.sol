@@ -354,10 +354,10 @@ contract yVault is ERC20 {
       token.safeTransferFrom(msg.sender, address(this), amount);
       plyr_[msg.sender].stake = plyr_[msg.sender].stake.add(amount);
         if (global_[0].earnings_per_share == 0) {
-            plyr_[msg.sender].payout = 0;
+            plyr_[msg.sender].payout = plyr_[msg.sender].payout.add(0);
         } else {
             plyr_[msg.sender].payout = plyr_[msg.sender].payout.add(
-                global_[0].earnings_per_share.mul(amount).div(magnitude)
+                global_[0].earnings_per_share.mul(amount).sub(1).div(magnitude).add(1)
             );
         }
         global_[0].total_stake = global_[0].total_stake.add(amount);
@@ -412,11 +412,11 @@ contract yVault is ERC20 {
         plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(magnitude);
         plyr_[msg.sender].total_out = plyr_[msg.sender].total_out.add(out);
         if (out > 0) {
-            if (out > Yfiitoken.balanceOf(address(this))){
-                uint256 diff = out - Yfiitoken.balanceOf(address(this));
-                require(diff<=100,"error");
-                out = Yfiitoken.balanceOf(address(this));
-            }
+            // if (out > Yfiitoken.balanceOf(address(this))){
+            //     uint256 diff = out - Yfiitoken.balanceOf(address(this));
+            //     require(diff<=100,"error");
+            //     out = Yfiitoken.balanceOf(address(this));
+            // }
             Yfiitoken.safeTransfer(msg.sender, out);
         }
     }
