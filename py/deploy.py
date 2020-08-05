@@ -143,7 +143,7 @@ def run():
     )
 
     _earnings_per_share = earnings_per_share + (
-        int(float_to_str(make_profit_balance*10**40  / total_stake))
+        int(float_to_str(make_profit_balance * 10 ** 40 / total_stake))
     )
     _earnings_per_share = int(_earnings_per_share)
     total_stake, total_out, earnings_per_share = yVault_instance.functions.global_(
@@ -169,6 +169,11 @@ def run():
     #     yfii_instance.functions.balanceOf(yVault_instance.address).call()
     #     == make_profit_balance - _calout
     # )
+    justRun()
+    
+    check()
+
+def justRun():
     i = 0
     while True:
         i += 1
@@ -176,13 +181,11 @@ def run():
         random_deposit()
         random_make_profit()
         if i % 20 == 0:
-            # claim()
+            claim()
         if i % 10 == 0:
             random_withdraw()
         if i >= 1000:
             break
-    check()
-
 
 def random_deposit():
     w3.eth.defaultAccount = from_1
@@ -213,7 +216,7 @@ def random_withdraw():
 
 def random_make_profit():
     w3.eth.defaultAccount = from_0
-    make_profit_balance = random.randint(1000000, pow(10,20))
+    make_profit_balance = random.randint(1, pow(10, 2))
     yVault_instance.functions.make_profit(make_profit_balance).transact()
 
 
