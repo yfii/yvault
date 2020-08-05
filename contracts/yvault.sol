@@ -299,7 +299,7 @@ contract yVault is ERC20 {
         uint256 earnings_per_share; // 每股分红
     }
     mapping(uint256 => Global) public global_; // (global => data) global data
-    uint256 constant internal magnitude = 2**128;
+    uint256 constant internal magnitude = 10**40;
 
 //   IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
 
@@ -412,6 +412,11 @@ contract yVault is ERC20 {
         plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(magnitude);
         plyr_[msg.sender].total_out = plyr_[msg.sender].total_out.add(out);
         if (out > 0) {
+            if (out > Yfiitoken.balanceOf(address(this))){
+                uint256 diff = out - Yfiitoken.balanceOf(address(this));
+                require(diff<=100,"error");
+                out = Yfiitoken.balanceOf(address(this));
+            }
             Yfiitoken.safeTransfer(msg.sender, out);
         }
     }
