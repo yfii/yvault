@@ -155,20 +155,20 @@ def run():
         _earnings_per_share,
     ]
     # 算出应该领取的分红
-    _calout = int(float_to_str(earnings_per_share * stake/10**40 )) - payout
-    assert yVault_instance.functions.cal_out(from_1).call() == make_profit_balance
+    # _calout = int(float_to_str(earnings_per_share * stake/10**40 )) - payout
+    # assert yVault_instance.functions.cal_out(from_1).call() == make_profit_balance
 
     # 领取分红
-    w3.eth.defaultAccount = from_1
-    yVault_instance.functions.claim().transact()
+    # w3.eth.defaultAccount = from_1
+    # yVault_instance.functions.claim().transact()
 
-    stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
-    assert [stake, payout, total_out] == [deposit_balance, _calout, make_profit_balance]
+    # stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
+    # assert [stake, payout, total_out] == [deposit_balance, _calout, make_profit_balance]
 
-    assert (
-        yfii_instance.functions.balanceOf(yVault_instance.address).call()
-        == make_profit_balance - _calout
-    )
+    # assert (
+    #     yfii_instance.functions.balanceOf(yVault_instance.address).call()
+    #     == make_profit_balance - _calout
+    # )
     i = 0
     while True:
         i += 1
@@ -176,10 +176,10 @@ def run():
         random_deposit()
         random_make_profit()
         if i % 20 == 0:
-            claim()
+            # claim()
         if i % 10 == 0:
             random_withdraw()
-        if i >= 10000:
+        if i >= 1000:
             break
     check()
 
@@ -213,7 +213,7 @@ def random_withdraw():
 
 def random_make_profit():
     w3.eth.defaultAccount = from_0
-    make_profit_balance = random.randint(1000, pow(10,10))
+    make_profit_balance = random.randint(1000000, pow(10,20))
     yVault_instance.functions.make_profit(make_profit_balance).transact()
 
 
