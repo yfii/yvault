@@ -7,7 +7,7 @@ import random
 import decimal
 
 ctx = decimal.Context()
-ctx.prec = 30
+ctx.prec = 50
 
 
 def float_to_str(f):
@@ -143,7 +143,7 @@ def run():
     )
 
     _earnings_per_share = earnings_per_share + (
-        int(float_to_str(make_profit_balance*2**128  / total_stake))
+        int(float_to_str(make_profit_balance*10**40  / total_stake))
     )
     _earnings_per_share = int(_earnings_per_share)
     total_stake, total_out, earnings_per_share = yVault_instance.functions.global_(
@@ -155,7 +155,7 @@ def run():
         _earnings_per_share,
     ]
     # 算出应该领取的分红
-    _calout = int(float_to_str(earnings_per_share * stake/2**128 )) - payout
+    _calout = int(float_to_str(earnings_per_share * stake/10**40 )) - payout
     assert yVault_instance.functions.cal_out(from_1).call() == make_profit_balance
 
     # 领取分红
@@ -198,14 +198,14 @@ def random_withdraw():
     w3.eth.defaultAccount = from_1
 
     stake, payout, total_out = yVault_instance.functions.plyr_(from_1).call()
-    print(from_1,[stake, payout, total_out])
+    # print(from_1,[stake, payout, total_out])
     withdraw_balance = random.randint(1, stake // 2)
     yVault_instance.functions.withdraw(withdraw_balance).transact()
 
     w3.eth.defaultAccount = from_2
 
     stake, payout, total_out = yVault_instance.functions.plyr_(from_2).call()
-    print(from_2,[stake, payout, total_out])
+    # print(from_2,[stake, payout, total_out])
 
     withdraw_balance = random.randint(1, stake // 2)
     yVault_instance.functions.withdraw(withdraw_balance).transact()
@@ -213,7 +213,7 @@ def random_withdraw():
 
 def random_make_profit():
     w3.eth.defaultAccount = from_0
-    make_profit_balance = random.randint(10, 10000)
+    make_profit_balance = random.randint(1000, pow(10,10))
     yVault_instance.functions.make_profit(make_profit_balance).transact()
 
 
