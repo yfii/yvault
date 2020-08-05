@@ -395,7 +395,7 @@ contract yVault is ERC20 {
     function make_profit(uint256 amount) public { //给yvault 打分红
         Yfiitoken.safeTransferFrom(msg.sender, address(this), amount);
         global_[0].earnings_per_share = global_[0].earnings_per_share.add(
-            amount.mul(1e22).div(global_[0].total_stake)
+            amount.mul(magnitude).div(global_[0].total_stake)
         );
         global_[0].total_out = global_[0].total_out.add(amount);
     }
