@@ -271,6 +271,7 @@ interface Controller {
 interface IFreeFromUpTo {
     function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
 }
+
 contract yVault is ERC20 {
   using SafeERC20 for IERC20;
   using Address for address;
@@ -298,6 +299,7 @@ contract yVault is ERC20 {
         uint256 earnings_per_share; // 每股分红
     }
     mapping(uint256 => Global) public global_; // (global => data) global data
+    uint256 constant internal magnitude = 2**128;
 
 //   IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
 
@@ -355,7 +357,7 @@ contract yVault is ERC20 {
             plyr_[msg.sender].payout = 0;
         } else {
             plyr_[msg.sender].payout = plyr_[msg.sender].payout.add(
-                global_[0].earnings_per_share.mul(amount).div(1e22)
+                global_[0].earnings_per_share.mul(amount).div(magnitude)
             );
         }
         global_[0].total_stake = global_[0].total_stake.add(amount);
@@ -382,7 +384,7 @@ contract yVault is ERC20 {
       }
 
       plyr_[msg.sender].payout = plyr_[msg.sender].payout.sub(
-            global_[0].earnings_per_share.mul(amount).div(1e22)
+            global_[0].earnings_per_share.mul(amount).div(magnitude)
       );
       plyr_[msg.sender].stake = plyr_[msg.sender].stake.sub(amount);
       global_[0].total_stake = global_[0].total_stake.sub(amount);
@@ -398,7 +400,7 @@ contract yVault is ERC20 {
         global_[0].total_out = global_[0].total_out.add(amount);
     }
     function cal_out(address user) public view returns (uint256) { 
-        uint256 _cal = global_[0].earnings_per_share.mul(plyr_[user].stake).div(1e22);
+        uint256 _cal = global_[0].earnings_per_share.mul(plyr_[user].stake).div(magnitude);
         if (_cal < plyr_[user].payout) {
             return 0;
         } else {
@@ -407,7 +409,7 @@ contract yVault is ERC20 {
     }
     function claim() public { //领取分红
         uint256 out = cal_out(msg.sender);
-        plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(1e22);
+        plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(magnitude);
         plyr_[msg.sender].total_out = plyr_[msg.sender].total_out.add(out);
         if (out > 0) {
             Yfiitoken.safeTransfer(msg.sender, out);
