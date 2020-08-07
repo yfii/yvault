@@ -286,8 +286,8 @@ contract StrategyYfii {
     }
     
     function balanceOf() public view returns (uint) {
-        return balanceOfCurve()
-               .add(balanceOfYfii());
+        return balanceOfCurve();
+               
     }
     
     function setGovernance(address _governance) external {
