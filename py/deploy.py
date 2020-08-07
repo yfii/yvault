@@ -67,7 +67,7 @@ def deploy():
     token_instance = w3.eth.contract(address=tx_receipt.contractAddress, abi=abi)
     print(token_instance.functions.name().call())
 
-    StrategyYfii, abi = geneateCompiled_sol("StrategyCurveYfii.sol", "StrategyYfii")
+    StrategyYfii, abi = geneateCompiled_sol("yfiipool1/StrategyCurveYfii.sol", "StrategyYfii")
     tx_hash = StrategyYfii.constructor(controller_instance.address).transact()
     tx_receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     strategyYfii_instance = w3.eth.contract(address=tx_receipt.contractAddress, abi=abi)
@@ -77,7 +77,7 @@ def deploy():
         == controller_instance.address
     )
 
-    yVault, abi = geneateCompiled_sol("yvault.sol", "yVault")
+    yVault, abi = geneateCompiled_sol("yfiipool1/yvault.sol", "yVault")
     tx_hash = yVault.constructor(
         token_instance.address, controller_instance.address, yfii_instance.address
     ).transact()
