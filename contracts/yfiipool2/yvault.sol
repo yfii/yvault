@@ -267,6 +267,26 @@ interface Controller {
     function balanceOf(address) external view returns (uint);
     function earn(address, uint) external;
 }
+contract Balancer {
+    function joinPool(uint poolAmountOut, uint[] calldata maxAmountsIn) external;
+    function exitPool(uint poolAmountIn, uint[] calldata minAmountsOut) external;
+    function swapExactAmountIn(
+        address tokenIn,
+        uint tokenAmountIn,
+        address tokenOut,
+        uint minAmountOut,
+        uint maxPrice
+    ) external returns (uint tokenAmountOut, uint spotPriceAfter);
+    function swapExactAmountOut(
+        address tokenIn,
+        uint maxAmountIn,
+        address tokenOut,
+        uint tokenAmountOut,
+        uint maxPrice
+    ) external returns (uint tokenAmountIn, uint spotPriceAfter);
+    function joinswapExternAmountIn(address tokenIn, uint tokenAmountIn, uint minPoolAmountOut) external returns (uint poolAmountOut);
+    function exitswapPoolAmountIn(address tokenOut, uint poolAmountIn, uint minAmountOut) external returns (uint tokenAmountOut);
+}
 
 interface IFreeFromUpTo {
     function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
@@ -286,6 +306,9 @@ contract yVault is ERC20 {
   address public governance;
   address public controller;
 
+  address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+  address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+
     struct Player {
         uint256 stake; // 总质押总数
         uint256 payout; //
@@ -301,14 +324,14 @@ contract yVault is ERC20 {
     mapping(uint256 => Global) public global_; // (global => data) global data
     uint256 constant internal magnitude = 10**40;
 
-  IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+//   IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
 
-  modifier discountCHI {
-    uint256 gasStart = gasleft();
-    _;
-    uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
-    chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
-    }
+//   modifier discountCHI {
+//     uint256 gasStart = gasleft();
+//     _;
+//     uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
+//     chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
+//     }
 
 
   constructor (address _token, address _controller,address _yfiiaddress) public {
@@ -344,7 +367,7 @@ contract yVault is ERC20 {
       return token.balanceOf(address(this)).mul(min).div(max);
   }
   
-  function earn() public discountCHI{
+  function earn() public {
       uint _bal = available();
       token.safeTransfer(controller, _bal);
       Controller(controller).earn(address(token), _bal);
@@ -364,9 +387,23 @@ contract yVault is ERC20 {
 
       
   }
+  function dai2bpt(uint amount) external{
+      IERC20(dai).safeTransferFrom(msg.sender, address(this), amount);
+      IERC20(dai).safeApprove(balancer, 0);
+      IERC20(dai).safeApprove(balancer, amount);
+      uint256 bpt_amount = Balancer(balancer).joinswapExternAmountIn(dai,amount,0); //dai -> bpt
+      IERC20(bpt).safeTransfer(msg.sender,bpt_amount);
+  }  
+  function bpt2dai(uint amount) external{
+      IERC20(balancer).safeTransferFrom(msg.sender, address(this), amount);
+      IERC20(balancer).safeApprove(balancer, 0);
+      IERC20(balancer).safeApprove(balancer, amount);
+      uint256 dai_amount = Balancer(balancer).exitswapPoolAmountIn(dai,amount,0); //bpt -> dai
+      IERC20(dai).safeTransfer(msg.sender,dai_amount);
+  }
 
   // No rebalance implementation for lower fees and faster swaps
-  function withdraw(uint amount) external discountCHI{
+  function withdraw(uint amount) external {
       claim();//先领取分红.
       require(amount<=plyr_[msg.sender].stake,"!balance");
       uint r = amount;
