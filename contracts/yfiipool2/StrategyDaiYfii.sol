@@ -195,14 +195,11 @@ contract StrategyYfiiPool2 {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
-    address constant public pool = address(0xb81D3cB2708530ea990a287142b82D058725C092);
+    address constant public want = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+    address constant public pool = address(0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
-    address constant public curve = address(0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51);
     
-    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    address constant public ydai = address(0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01);
     
     uint constant public fee = 50;
     uint constant public max = 10000;
@@ -215,10 +212,11 @@ contract StrategyYfiiPool2 {
         controller = _controller;
     }
     
-    function deposit() external { //把ycrv stake到 pool1
-        IERC20(want).safeApprove(pool, 0);
-        IERC20(want).safeApprove(pool, IERC20(want).balanceOf(address(this)));
-        Yfii(pool).stake(IERC20(want).balanceOf(address(this)));
+    function deposit() external { 
+        //bpt -> pool2
+        IERC20(balancer).safeApprove(pool, 0);
+        IERC20(balancer).safeApprove(pool, IERC20(balancer).balanceOf(address(this)));
+        Yfii(pool).stake(IERC20(balancer).balanceOf(address(this)));
     }
     
     // Controller only function for creating additional rewards from dust
@@ -277,8 +275,8 @@ contract StrategyYfiiPool2 {
         return _amount;
     }
     
-    function balanceOfCurve() public view returns (uint) {
-        return IERC20(want).balanceOf(address(this));
+    function balanceOfbpt() public view returns (uint) {
+        return IERC20(balancer).balanceOf(address(this));
     }
     
     function balanceOfYfii() public view returns (uint) {
@@ -286,7 +284,7 @@ contract StrategyYfiiPool2 {
     }
     
     function balanceOf() public view returns (uint) {
-        return balanceOfCurve();
+        return balanceOfbpt();
                
     }
     
