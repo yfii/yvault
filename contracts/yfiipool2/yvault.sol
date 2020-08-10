@@ -392,7 +392,7 @@ contract yVault is ERC20 {
       IERC20(dai).safeApprove(balancer, 0);
       IERC20(dai).safeApprove(balancer, amount);
       uint256 bpt_amount = Balancer(balancer).joinswapExternAmountIn(dai,amount,0); //dai -> bpt
-      IERC20(bpt).safeTransfer(msg.sender,bpt_amount);
+      IERC20(balancer).safeTransfer(msg.sender,bpt_amount);
   }  
   function bpt2dai(uint amount) external{
       IERC20(balancer).safeTransferFrom(msg.sender, address(this), amount);
