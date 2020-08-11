@@ -195,10 +195,10 @@ contract StrategyYfiiPool2 {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
-    address constant public pool = address(0xAFfcD3D45cEF58B1DfA773463824c6F6bB0Dc13a);
-    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+    address constant public want = address(0xB7402204753DD10FBfc74cF4Ee6FCA05017B716D);
+    address constant public pool = address(0xFd14a4B51dE7297eb970aCcB9CDf82B5bA49d92b);
+    address constant public yfii = address(0xf2d645D45F0A46CDfa080595Df1d6C9D733296c3);
+    address constant public balancer = address(0xB7402204753DD10FBfc74cF4Ee6FCA05017B716D);
     
     
     uint constant public fee = 50;
