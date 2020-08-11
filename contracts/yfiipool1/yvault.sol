@@ -301,7 +301,7 @@ contract yVault is ERC20 {
     mapping(uint256 => Global) public global_; // (global => data) global data
     uint256 constant internal magnitude = 10**40;
 
-  IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+  IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0c6326D2eB29060FAEb1d2be8808D43c73846733);
 
   modifier discountCHI {
     uint256 gasStart = gasleft();
