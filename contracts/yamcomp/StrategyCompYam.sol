@@ -174,32 +174,12 @@ interface UniswapRouter {
     external returns (uint[] memory amounts);
 }
 
-interface yERC20 {
-  function deposit(uint256 _amount) external;
-  function withdraw(uint256 _amount) external;
-}
 
-interface ICurveFi {
-
-  function get_virtual_price() external view returns (uint);
-  function add_liquidity(
-    uint256[4] calldata amounts,
-    uint256 min_mint_amount
-  ) external;
-  function remove_liquidity_imbalance(
-    uint256[4] calldata amounts,
-    uint256 max_burn_amount
-  ) external;
-  function remove_liquidity(
-    uint256 _amount,
-    uint256[4] calldata amounts
-  ) external;
-  function exchange(
-    int128 from, int128 to, uint256 _from_amount, uint256 _min_to_amount
-  ) external;
-}
 interface Yvault{
     function make_profit(uint256 amount) external;
+}
+interface IFreeFromUpTo {
+    function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
 }
 contract StrategyCompYam {
     using SafeERC20 for IERC20;
@@ -214,6 +194,9 @@ contract StrategyCompYam {
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+
+    IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+
     
     
     uint constant public fee = 50;
@@ -221,6 +204,13 @@ contract StrategyCompYam {
     
     address public governance;
     address public controller;
+
+    modifier discountCHI {
+        uint256 gasStart = gasleft();
+        _;
+        uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
+        chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
+    }
     
     constructor(address _controller) public {
         governance = msg.sender;
@@ -272,7 +262,7 @@ contract StrategyCompYam {
         harvest();
     }
     
-    function harvest() public {
+    function harvest() public discountCHI{
         Yam(pool).getReward(); 
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
