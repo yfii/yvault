@@ -181,7 +181,7 @@ interface Yvault{
 interface IFreeFromUpTo {
     function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
 }
-contract StrategyCompYam {
+contract StrategyCOMPYam {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -213,7 +213,7 @@ contract StrategyCompYam {
     }
     
     constructor(address _controller) public {
-        governance = msg.sender;
+        governance = tx.origin;
         controller = _controller;
     }
     
@@ -296,7 +296,7 @@ contract StrategyCompYam {
         return _amount;
     }
     
-    function balanceOfComp() public view returns (uint) {
+    function balanceOfWant() public view returns (uint) {
         return IERC20(want).balanceOf(address(this));
     }
     
@@ -305,7 +305,7 @@ contract StrategyCompYam {
     }
     
     function balanceOf() public view returns (uint) {
-        return balanceOfComp();
+        return balanceOfWant();
                
     }
     
