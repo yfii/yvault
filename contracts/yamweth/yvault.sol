@@ -370,13 +370,13 @@ contract yVaultWETH is ERC20 {
 
   // No rebalance implementation for lower fees and faster swaps
   function withdraw(uint amount) external discountCHI{
-      claim();//先领取分红.
+      claim();
       require(amount<=plyr_[msg.sender].stake,"!balance");
       uint r = amount;
 
       // Check balance
       uint b = token.balanceOf(address(this));
-      if (b < r) { //这边是 假如取出来的钱变少了...
+      if (b < r) { 
           uint _withdraw = r.sub(b);
           Controller(controller).withdraw(address(token), _withdraw);
           uint _after = token.balanceOf(address(this));
@@ -395,7 +395,7 @@ contract yVaultWETH is ERC20 {
       token.safeTransfer(msg.sender, r);
   }
 
-    function make_profit(uint256 amount) public { //给yvault 打分红
+    function make_profit(uint256 amount) public { 
         require(amount>0,"not 0");
         Yfiitoken.safeTransferFrom(msg.sender, address(this), amount);
         global_[0].earnings_per_share = global_[0].earnings_per_share.add(
@@ -411,16 +411,11 @@ contract yVaultWETH is ERC20 {
             return _cal.sub(plyr_[user].payout);
         }
     }
-    function claim() public { //领取分红
+    function claim() public { 
         uint256 out = cal_out(msg.sender);
         plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(magnitude);
         plyr_[msg.sender].total_out = plyr_[msg.sender].total_out.add(out);
         if (out > 0) {
-            // if (out > Yfiitoken.balanceOf(address(this))){
-            //     uint256 diff = out - Yfiitoken.balanceOf(address(this));
-            //     require(diff<=100,"error");
-            //     out = Yfiitoken.balanceOf(address(this));
-            // }
             Yfiitoken.safeTransfer(msg.sender, out);
         }
     }
