@@ -290,6 +290,11 @@ contract StrategyCompYam {
         IERC20(dai).safeApprove(balancer, IERC20(dai).balanceOf(address(this)));
         Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
 
+        // fee
+        uint b = IERC20(yfii).balanceOf(address(this));
+        uint _fee = b.mul(fee).div(max);
+        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee);
+
         //把yfii 存进去分红.
         IERC20(yfii).safeApprove(_vault, 0);
         IERC20(yfii).safeApprove(_vault, IERC20(yfii).balanceOf(address(this)));
