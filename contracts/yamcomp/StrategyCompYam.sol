@@ -207,7 +207,7 @@ contract StrategyCompYam {
     using SafeMath for uint256;
     
     address constant public want = address(0xc00e94Cb662C3520282E6f5717214004A7f26888);
-    address constant public pool = address();
+    address constant public pool = address(0x8538E5910c6F80419CD3170c26073Ff238048c9E);
     address constant public yfii = address(0xf2d645D45F0A46CDfa080595Df1d6C9D733296c3);
     address constant public yam = address(0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
