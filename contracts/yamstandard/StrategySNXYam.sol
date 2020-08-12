@@ -203,7 +203,10 @@ contract StrategyStandardYam {
     
     address public governance;
     address public controller;
-
+    
+    address  public want;
+    address  public pool ;
+    
     modifier discountCHI {
         uint256 gasStart = gasleft();
         _;
@@ -214,8 +217,8 @@ contract StrategyStandardYam {
     constructor(address _controller,address _want,address _pool) public {
         governance = tx.origin;
         controller = _controller;
-        address constant public want = _want;
-        address constant public pool = _pool;
+        want = _want;
+        pool = _pool;
     }
     
     
