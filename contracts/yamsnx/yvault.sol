@@ -303,7 +303,7 @@ contract yVaultSNX is ERC20 {
 
     IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address constant public comp = address(0xc00e94Cb662C3520282E6f5717214004A7f26888);
+    address constant public snx = address(0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F);
 
 
   modifier discountCHI {
@@ -315,7 +315,7 @@ contract yVaultSNX is ERC20 {
 
 
   constructor (address _controller) public {
-      token = IERC20(comp);
+      token = IERC20(snx);
       Yfiitoken = IERC20(yfii);
       governance = tx.origin;
       controller = _controller;

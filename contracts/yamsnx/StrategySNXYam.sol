@@ -186,8 +186,8 @@ contract StrategySNXYam {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xc00e94Cb662C3520282E6f5717214004A7f26888);
-    address constant public pool = address(0x8538E5910c6F80419CD3170c26073Ff238048c9E);
+    address constant public want = address(0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F);
+    address constant public pool = address(0x6c3FC1FFDb14D92394f40eeC91D9Ce8B807f132D);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public yam = address(0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
