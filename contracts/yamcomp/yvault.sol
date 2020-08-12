@@ -301,7 +301,10 @@ contract yVault is ERC20 {
     mapping(uint256 => Global) public global_; // (global => data) global data
     uint256 constant internal magnitude = 10**40;
 
-  IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0c6326D2eB29060FAEb1d2be8808D43c73846733);
+    IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+    address constant public comp = address(0xc00e94Cb662C3520282E6f5717214004A7f26888);
+
 
   modifier discountCHI {
     uint256 gasStart = gasleft();
@@ -311,9 +314,9 @@ contract yVault is ERC20 {
     }
 
 
-  constructor (address _token, address _controller,address _yfiiaddress) public {
-      token = IERC20(_token);
-      Yfiitoken = IERC20(_yfiiaddress);
+  constructor (address _controller) public {
+      token = IERC20(comp);
+      Yfiitoken = IERC20(yfii);
       governance = msg.sender;
       controller = _controller;
   }
