@@ -134,7 +134,7 @@ interface Controller {
  
 */
 
-interface Yfii {
+interface Yam {
     function withdraw(uint) external;
     function getReward() external;
     function stake(uint) external;
@@ -162,137 +162,81 @@ contract Balancer {
     function joinswapExternAmountIn(address tokenIn, uint tokenAmountIn, uint minPoolAmountOut) external returns (uint poolAmountOut);
     function exitswapPoolAmountIn(address tokenOut, uint poolAmountIn, uint minAmountOut) external returns (uint tokenAmountOut);
 }
+interface UniswapRouter {
+  function swapExactTokensForTokens(
+      uint amountIn,
+      uint amountOutMin,
+      address[] calldata path,
+      address to,
+      uint deadline
+    ) external returns (uint[] memory amounts);
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    external returns (uint[] memory amounts);
+}
 
 interface yERC20 {
   function deposit(uint256 _amount) external;
   function withdraw(uint256 _amount) external;
 }
 
-interface ICurveFi {
 
-  function get_virtual_price() external view returns (uint);
-  function add_liquidity(
-    uint256[4] calldata amounts,
-    uint256 min_mint_amount
-  ) external;
-  function remove_liquidity_imbalance(
-    uint256[4] calldata amounts,
-    uint256 max_burn_amount
-  ) external;
-  function remove_liquidity(
-    uint256 _amount,
-    uint256[4] calldata amounts
-  ) external;
-  function exchange(
-    int128 from, int128 to, uint256 _from_amount, uint256 _min_to_amount
-  ) external;
-}
 interface Yvault{
     function make_profit(uint256 amount) external;
 }
-contract StrategyYfii {
+contract Swap {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0x49bD7631856078257d5Aef996Cb1218519eA1Db4);
-    address constant public pool = address(0x343887B22FB4088ED3cFeDCdDb08c67C01ca639A);
-    address constant public yfii = address(0xf2d645D45F0A46CDfa080595Df1d6C9D733296c3);
+    address constant public want = address(0xc00e94Cb662C3520282E6f5717214004A7f26888);
+    address constant public pool = address(0x8538E5910c6F80419CD3170c26073Ff238048c9E);
+    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+    address constant public yam = address(0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16);
+    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
     
+    address public owner;
     
-    uint constant public fee = 50;
-    uint constant public max = 10000;
-    
-    address public governance;
-    address public controller;
-    
-    constructor(address _controller) public {
-        governance = msg.sender;
-        controller = _controller;
+    constructor()public{
+        owner = tx.origin;
+    }
+    modifier onlyOwner(){
+        require(msg.sender == owner,"not owner");
+        _;
     }
     
-    function deposit() external { //把ycrv stake到 pool1
-        IERC20(want).safeApprove(pool, 0);
-        IERC20(want).safeApprove(pool, IERC20(want).balanceOf(address(this)));
-        Yfii(pool).stake(IERC20(want).balanceOf(address(this)));
-    }
-    
-    // Controller only function for creating additional rewards from dust
-    function withdraw(IERC20 _asset) external returns (uint balance) {
-        require(msg.sender == controller, "!controller");
-        require(want != address(_asset), "want");
-        balance = _asset.balanceOf(address(this));
-        _asset.safeTransfer(controller, balance);
-    }
-    
-    // Withdraw partial funds, normally used with a vault withdrawal
-    function withdraw(uint _amount) external {
-        require(msg.sender == controller, "!controller");
-        uint _balance = IERC20(want).balanceOf(address(this));
-        if (_balance < _amount) {
-            _amount = _withdrawSome(_amount.sub(_balance));//要提取的钱不够，从pool提缺少的出来
-            _amount = _amount.add(_balance);
-        }
-        
-        address _vault = Controller(controller).vaults(address(want));//金库的地址.
-        require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
-        IERC20(want).safeTransfer(_vault, _amount);
-    }
-    
-    // Withdraw all funds, normally used when migrating strategies
-    function withdrawAll() external returns (uint balance) { //把ycrv 还到金库 走人
-        require(msg.sender == controller, "!controller");
-        _withdrawAll();
-        balance = IERC20(want).balanceOf(address(this));
-        
-        address _vault = Controller(controller).vaults(address(want));
-        require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
-        IERC20(want).safeTransfer(_vault, balance);
-        
-    }
-    
-    function _withdrawAll() internal { //退池子 已经领取收益. 收益换成ycrv
-        Yfii(pool).exit();
-        harvest();
-    }
-    
-    function harvest() public {//砸盘yfii
-        Yfii(pool).getReward(); //领取yfii
-        address _vault = Controller(controller).vaults(address(want));
-        require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
+    
+    function harvest() public {
+        IERC20(yam).approve(unirouter, uint(-1));
+        address[] memory path3 = new address[](3);
+        path3[0] = address(yam);
+        path3[1] = address(weth);
+        path3[2] = address(dai);
+        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(yam).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
+
+        // dai ->yfii
+        IERC20(dai).safeApprove(balancer, 0);
+        IERC20(dai).safeApprove(balancer, IERC20(dai).balanceOf(address(this)));
+        Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
 
         //把yfii 存进去分红.
-        IERC20(yfii).safeApprove(_vault, 0);
-        IERC20(yfii).safeApprove(_vault, IERC20(yfii).balanceOf(address(this)));
-        Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
+        // IERC20(yfii).safeApprove(_vault, 0);
+        // IERC20(yfii).safeApprove(_vault, IERC20(yfii).balanceOf(address(this)));
+        // Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
+        IERC20(yfii).safeTransfer(msg.sender,IERC20(yfii).balanceOf(address(this)));
+        
     }
-    
-    function _withdrawSome(uint256 _amount) internal returns (uint) {
-        Yfii(pool).withdraw(_amount);
-        return _amount;
-    }
-    
-    function balanceOfCurve() public view returns (uint) {
-        return IERC20(want).balanceOf(address(this));
-    }
-    
-    function balanceOfYfii() public view returns (uint) {
-        return Yfii(pool).balanceOf(address(this));
-    }
-    
-    function balanceOf() public view returns (uint) {
-        return balanceOfCurve();
-               
-    }
-    
-    function setGovernance(address _governance) external {
-        require(msg.sender == governance, "!governance");
-        governance = _governance;
-    }
-    
-    function setController(address _controller) external {
-        require(msg.sender == governance, "!governance");
-        controller = _controller;
-    }
+    function inCaseTokenGetsStuck(IERC20 _TokenAddress) onlyOwner public {
+          uint qty = _TokenAddress.balanceOf(address(this));
+          _TokenAddress.safeTransfer(msg.sender, qty);
+      }
+
+  // incase of half-way error
+      function inCaseETHGetsStuck() onlyOwner public{
+          (bool result, ) = msg.sender.call.value(address(this).balance)("");
+          require(result, "transfer of ETH failed");
+      }
 }

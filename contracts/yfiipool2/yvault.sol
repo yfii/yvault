@@ -306,7 +306,7 @@ contract yVault is ERC20 {
   address public governance;
   address public controller;
 
-  address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+  address constant public balancer = address(0xB7402204753DD10FBfc74cF4Ee6FCA05017B716D);
   address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
 
     struct Player {
