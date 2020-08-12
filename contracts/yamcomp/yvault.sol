@@ -272,7 +272,7 @@ interface IFreeFromUpTo {
     function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
 }
 
-contract yVault is ERC20 {
+contract yVaultComp is ERC20 {
   using SafeERC20 for IERC20;
   using Address for address;
   using SafeMath for uint256;
