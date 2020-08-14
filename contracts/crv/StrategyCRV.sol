@@ -161,10 +161,6 @@ contract StrategyCRV {
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
-    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
     address public constant curvedeposit = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
     address public constant curveminter = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
 
