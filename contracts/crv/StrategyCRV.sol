@@ -137,7 +137,7 @@ interface Controller {
 interface CurveDeposit{
     function deposit(uint256) external;
     function withdraw(uint256) external;
-    function balanceOf(address) external returns (uint256);
+    function balanceOf(address) external view returns (uint256);
 }
 interface CurveMinter{
     function mint(address) external;
@@ -269,8 +269,7 @@ contract StrategyCRV {
     }
     
     function harvest() public discountCHI{
-        //reject contract call
-        require(!isContract(msg.sender),"!contract")
+
         CurveMinter(curveminter).mint(curvedeposit);//get crv
         
         address _vault = Controller(controller).vaults(address(want));
@@ -309,8 +308,8 @@ contract StrategyCRV {
         return IERC20(want).balanceOf(address(this));
     }
     
-    function balanceOfYam() public view returns (uint) {
-        return Yam(pool).balanceOf(address(this));
+    function balanceOfCRV() public view returns (uint) {
+        return CurveDeposit(curvedeposit).balanceOf(address(this));
     }
     
     function balanceOf() public view returns (uint) {
