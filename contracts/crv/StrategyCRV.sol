@@ -134,12 +134,13 @@ interface Controller {
  
 */
 
-interface Yam {
-    function withdraw(uint) external;
-    function getReward() external;
-    function stake(uint) external;
-    function balanceOf(address) external view returns (uint);
-    function exit() external;
+interface CurveDeposit{
+    function deposit(uint256) external;
+    function withdraw(uint256) external;
+    function balanceOf(address) external returns (uint256);
+}
+interface CurveMinter{
+    function mint(address) external;
 }
 
 contract Balancer {
@@ -188,24 +189,25 @@ contract StrategyCRV {
     
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address constant public yam = address(0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16);
+    address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+    address public constant curvedeposit = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
+    address public constant curveminter = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
 
     IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
 
     
     
-    uint constant public fee = 50;
+    uint constant public fee = 100;
     uint constant public max = 10000;
     
     address public governance;
     address public controller;
     
     address  public want;
-    address  public pool ;
     
     modifier discountCHI {
         uint256 gasStart = gasleft();
@@ -214,18 +216,17 @@ contract StrategyCRV {
         chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
     }
     
-    constructor(address _controller,address _want,address _pool) public {
+    constructor(address _controller,address _want) public {
         governance = tx.origin;
         controller = _controller;
         want = _want;
-        pool = _pool;
     }
     
     
     function deposit() external { 
-        IERC20(want).safeApprove(pool, 0);
-        IERC20(want).safeApprove(pool, IERC20(want).balanceOf(address(this)));
-        Yam(pool).stake(IERC20(want).balanceOf(address(this)));
+        IERC20(want).safeApprove(curvedeposit, 0);
+        IERC20(want).safeApprove(curvedeposit, IERC20(want).balanceOf(address(this)));
+        CurveDeposit(curvedeposit).deposit(IERC20(want).balanceOf(address(this)));
     }
     
     // Controller only function for creating additional rewards from dust
@@ -241,8 +242,7 @@ contract StrategyCRV {
         require(msg.sender == controller, "!controller");
         uint _balance = IERC20(want).balanceOf(address(this));
         if (_balance < _amount) {
-            _amount = _withdrawSome(_amount.sub(_balance));
-            _amount = _amount.add(_balance);
+            _withdrawSome(_amount.sub(_balance));
         }
         
         address _vault = Controller(controller).vaults(address(want));
@@ -263,32 +263,37 @@ contract StrategyCRV {
     }
     
     function _withdrawAll() internal { 
-        Yam(pool).exit();
         harvest();
+        uint256 b = CurveDeposit(curvedeposit).balanceOf(address(this));
+        _withdrawSome(b);
     }
     
     function harvest() public discountCHI{
-        Yam(pool).getReward(); 
+        //reject contract call
+        require(!isContract(msg.sender),"!contract")
+        CurveMinter(curveminter).mint(curvedeposit);//get crv
+        
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        // yam->weth->dai
-        IERC20(yam).approve(unirouter, uint(-1));
+        // crv->weth->dai
+        IERC20(crv).approve(unirouter, uint(-1));
         address[] memory path3 = new address[](3);
-        path3[0] = address(yam);
+        path3[0] = address(crv);
         path3[1] = address(weth);
         path3[2] = address(dai);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(yam).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
+        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(crv).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
 
         // dai ->yfii
         IERC20(dai).safeApprove(balancer, 0);
         IERC20(dai).safeApprove(balancer, IERC20(dai).balanceOf(address(this)));
         Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
 
-        // fee
+        // dev fee
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
-        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee);
+        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //dev 1%
+        IERC20(yfii).safeTransfer(msg.sender, _fee); //call fee 1%
 
         //把yfii 存进去分红.
         IERC20(yfii).safeApprove(_vault, 0);
@@ -296,9 +301,8 @@ contract StrategyCRV {
         Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
     }
     
-    function _withdrawSome(uint256 _amount) internal returns (uint) {
-        Yam(pool).withdraw(_amount);
-        return _amount;
+    function _withdrawSome(uint256 _amount) internal {
+        CurveDeposit(curvedeposit).withdraw(_amount);
     }
     
     function balanceOfWant() public view returns (uint) {
