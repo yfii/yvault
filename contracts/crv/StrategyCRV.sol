@@ -255,6 +255,7 @@ contract StrategyCRV {
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
         require(swap != address(0), "!swap");
+        IERC20(crv).safeApprove(swap, 0);
         IERC20(crv).safeApprove(swap, IERC20(crv).balanceOf(address(this)));
         Swap(swap).doswap(IERC20(crv).balanceOf(address(this)));
         
