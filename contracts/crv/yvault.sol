@@ -282,6 +282,8 @@ contract yVaultCRV is ERC20 {
   
   uint public min = 9500;
   uint public constant max = 10000;
+
+  uint public earnLowerlimit = 1e18*10000; //池内空余资金到这个值就自动earn
   
   address public governance;
   address public controller;
@@ -339,7 +341,10 @@ contract yVaultCRV is ERC20 {
       require(msg.sender == governance, "!governance");
       controller = _controller;
   }
-  
+  function setEarnLowerlimit(uint256 _earnLowerlimit) public{
+      require(msg.sender == governance, "!governance");
+      earnLowerlimit = _earnLowerlimit;
+  }
   // Custom logic in here for how much the vault allows to be borrowed
   // Sets minimum required on-hand to keep small withdrawals cheap
   function available() public view returns (uint) {
@@ -363,6 +368,10 @@ contract yVaultCRV is ERC20 {
             );
         }
         global_[0].total_stake = global_[0].total_stake.add(amount);
+
+      if (token.balanceOf(address(this))>earnLowerlimit){
+          earn();
+      }
 
       
   }
