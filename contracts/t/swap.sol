@@ -115,32 +115,7 @@ library SafeERC20 {
     }
 }
 
-interface Controller {
-    function vaults(address) external view returns (address);
-    function rewards() external view returns (address);
-}
 
-/*
-
- A strategy must implement the following calls;
- 
- - deposit()
- - withdraw(address) must exclude any tokens used in the yield - Controller role - withdraw should return to Controller
- - withdraw(uint) - Controller | Vault role - withdraw should always return to vault
- - withdrawAll() - Controller | Vault role - withdraw should always return to vault
- - balanceOf()
- 
- Where possible, strategies must remain as immutable as possible, instead of updating variables, we update the contract by linking it in the controller
- 
-*/
-
-interface Yam {
-    function withdraw(uint) external;
-    function getReward() external;
-    function stake(uint) external;
-    function balanceOf(address) external view returns (uint);
-    function exit() external;
-}
 
 contract Balancer {
     function joinPool(uint poolAmountOut, uint[] calldata maxAmountsIn) external;
@@ -174,59 +149,48 @@ interface UniswapRouter {
     external returns (uint[] memory amounts);
 }
 
-interface yERC20 {
-  function deposit(uint256 _amount) external;
-  function withdraw(uint256 _amount) external;
-}
-
-
-interface Yvault{
-    function make_profit(uint256 amount) external;
-}
 contract Swap {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
-    
-    address constant public want = address(0xc00e94Cb662C3520282E6f5717214004A7f26888);
-    address constant public pool = address(0x8538E5910c6F80419CD3170c26073Ff238048c9E);
-    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address constant public yam = address(0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16);
-    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
-    
+
     address public owner;
     
     constructor()public{
         owner = tx.origin;
+        init();
     }
     modifier onlyOwner(){
         require(msg.sender == owner,"not owner");
         _;
     }
     
-
+    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+    address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
+    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
     
-    function harvest() public {
-        IERC20(yam).approve(unirouter, uint(-1));
+    function init () public{
+        IERC20(crv).safeApprove(unirouter, uint(-1));
+        IERC20(dai).safeApprove(balancer, uint(-1));
+    }
+    
+    function doswap(uint256 _amount) public {
+        IERC20(crv).safeTransferFrom(msg.sender, address(this), _amount);
+        
+       // crv->weth->dai
         address[] memory path3 = new address[](3);
-        path3[0] = address(yam);
+        path3[0] = address(crv);
         path3[1] = address(weth);
         path3[2] = address(dai);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(yam).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
+        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(crv).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
 
         // dai ->yfii
-        IERC20(dai).safeApprove(balancer, 0);
-        IERC20(dai).safeApprove(balancer, IERC20(dai).balanceOf(address(this)));
         Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
 
-        //把yfii 存进去分红.
-        // IERC20(yfii).safeApprove(_vault, 0);
-        // IERC20(yfii).safeApprove(_vault, IERC20(yfii).balanceOf(address(this)));
-        // Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
-        IERC20(yfii).safeTransfer(msg.sender,IERC20(yfii).balanceOf(address(this)));
+        IERC20(yfii).safeTransfer(msg.sender, IERC20(yfii).balanceOf(address(this)));
         
     }
     function inCaseTokenGetsStuck(IERC20 _TokenAddress) onlyOwner public {
