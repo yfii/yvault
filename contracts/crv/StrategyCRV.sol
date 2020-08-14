@@ -143,44 +143,15 @@ interface CurveMinter{
     function mint(address) external;
 }
 
-contract Balancer {
-    function joinPool(uint poolAmountOut, uint[] calldata maxAmountsIn) external;
-    function exitPool(uint poolAmountIn, uint[] calldata minAmountsOut) external;
-    function swapExactAmountIn(
-        address tokenIn,
-        uint tokenAmountIn,
-        address tokenOut,
-        uint minAmountOut,
-        uint maxPrice
-    ) external returns (uint tokenAmountOut, uint spotPriceAfter);
-    function swapExactAmountOut(
-        address tokenIn,
-        uint maxAmountIn,
-        address tokenOut,
-        uint tokenAmountOut,
-        uint maxPrice
-    ) external returns (uint tokenAmountIn, uint spotPriceAfter);
-    function joinswapExternAmountIn(address tokenIn, uint tokenAmountIn, uint minPoolAmountOut) external returns (uint poolAmountOut);
-    function exitswapPoolAmountIn(address tokenOut, uint poolAmountIn, uint minAmountOut) external returns (uint tokenAmountOut);
-}
-interface UniswapRouter {
-  function swapExactTokensForTokens(
-      uint amountIn,
-      uint amountOutMin,
-      address[] calldata path,
-      address to,
-      uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-    external returns (uint[] memory amounts);
-}
-
 
 interface Yvault{
     function make_profit(uint256 amount) external;
 }
 interface IFreeFromUpTo {
     function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
+}
+interface Swap{
+    function doswap(uint256 _amount) external returns(uint256);
 }
 contract StrategyCRV {
     using SafeERC20 for IERC20;
@@ -201,13 +172,14 @@ contract StrategyCRV {
 
     
     
-    uint constant public fee = 100;
+    uint public fee = 100;
     uint constant public max = 10000;
     
     address public governance;
     address public controller;
     
     address  public want;
+    address  public swap; //swap token to yfii 
     
     modifier discountCHI {
         uint256 gasStart = gasleft();
@@ -216,10 +188,11 @@ contract StrategyCRV {
         chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
     }
     
-    constructor(address _controller,address _want) public {
+    constructor(address _controller,address _swap) public {
         governance = tx.origin;
         controller = _controller;
-        want = _want;
+        want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;
+        swap = _swap;
     }
     
     
@@ -275,19 +248,10 @@ contract StrategyCRV {
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        // crv->weth->dai
-        IERC20(crv).approve(unirouter, uint(-1));
-        address[] memory path3 = new address[](3);
-        path3[0] = address(crv);
-        path3[1] = address(weth);
-        path3[2] = address(dai);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(crv).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
-
-        // dai ->yfii
-        IERC20(dai).safeApprove(balancer, 0);
-        IERC20(dai).safeApprove(balancer, IERC20(dai).balanceOf(address(this)));
-        Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
-
+        require(swap != address(0), "!swap");
+        IERC20(crv).safeApprove(swap, IERC20(crv).balanceOf(address(this)));
+        Swap(swap).doswap(IERC20(crv).balanceOf(address(this)));
+        
         // dev fee
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
@@ -325,5 +289,15 @@ contract StrategyCRV {
     function setController(address _controller) external {
         require(msg.sender == governance, "!governance");
         controller = _controller;
+    }
+
+    function setFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        fee = _fee;
+    }
+
+    function setSwap(address _swap) external{
+        require(msg.sender == governance, "!governance");
+        swap = _swap;
     }
 }
