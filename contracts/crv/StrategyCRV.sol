@@ -169,6 +169,7 @@ contract StrategyCRV {
     
     
     uint public fee = 100;
+    uint public callfee = 100;
     uint constant public max = 10000;
     
     address public governance;
@@ -187,7 +188,7 @@ contract StrategyCRV {
     constructor(address _controller) public {
         governance = tx.origin;
         controller = _controller;
-        want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;
+        want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;//ycrv
         swap = 0xc3D50438150853A61f61Afe413FaCB81FbeE8d7e;
     }
     
@@ -251,8 +252,9 @@ contract StrategyCRV {
         // dev fee
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
-        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //dev 1%
-        IERC20(yfii).safeTransfer(msg.sender, _fee); //call fee 1%
+        uint _callfee = b.mul(callfee).div(max);
+        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //team 1%
+        IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
 
         //把yfii 存进去分红.
         IERC20(yfii).safeApprove(_vault, 0);
@@ -290,6 +292,10 @@ contract StrategyCRV {
     function setFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         fee = _fee;
+    }
+    function setCallFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        callfee = _fee;
     }
 
     function setSwap(address _swap) external{
