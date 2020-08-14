@@ -192,6 +192,14 @@ contract StrategyCRV {
         swap = 0xc3D50438150853A61f61Afe413FaCB81FbeE8d7e;
     }
     
+    function isContract(address account) internal view returns (bool) {
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        // solhint-disable-next-line no-inline-assembly
+        assembly { codehash := extcodehash(account) }
+        return (codehash != 0x0 && codehash != accountHash);
+    }
+    
     
     function deposit() external { 
         IERC20(want).safeApprove(curvedeposit, 0);
@@ -239,6 +247,7 @@ contract StrategyCRV {
     }
     
     function harvest() public discountCHI{
+        require(!isContract(msg.sender),"!contract");
 
         CurveMinter(curveminter).mint(curvedeposit);//get crv
         
