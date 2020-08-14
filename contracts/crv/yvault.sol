@@ -266,6 +266,7 @@ interface Controller {
     function withdraw(address, uint) external;
     function balanceOf(address) external view returns (uint);
     function earn(address, uint) external;
+    function rewards() external view returns (address);
 }
 
 interface IFreeFromUpTo {
@@ -301,6 +302,7 @@ contract yVaultCRV is ERC20 {
         uint256 earnings_per_share; // 每股分红
     }
     mapping(uint256 => Global) public global_; // (global => data) global data
+    mapping (address => uint256) public deposittime;
     uint256 constant internal magnitude = 10**40;
 
     IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
@@ -372,6 +374,7 @@ contract yVaultCRV is ERC20 {
       if (token.balanceOf(address(this))>earnLowerlimit){
           earn();
       }
+      deposittime[msg.sender] = now;
 
       
   }
@@ -423,7 +426,15 @@ contract yVaultCRV is ERC20 {
         uint256 out = cal_out(msg.sender);
         plyr_[msg.sender].payout = global_[0].earnings_per_share.mul(plyr_[msg.sender].stake).div(magnitude);
         plyr_[msg.sender].total_out = plyr_[msg.sender].total_out.add(out);
+
         if (out > 0) {
+            uint256 _depositTime = now - deposittime[msg.sender];
+            if (_depositTime < 1 days){ //deposit in 24h
+                uint256 actually_out = _depositTime.mul(out).mul(1e18).div(1 days).div(1e18);
+                uint256 to_team = out.sub(actually_out);
+                Yfiitoken.safeTransfer(Controller(controller).rewards(), to_team);
+                out = actually_out;
+            }
             Yfiitoken.safeTransfer(msg.sender, out);
         }
     }
