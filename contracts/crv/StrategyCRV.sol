@@ -188,11 +188,11 @@ contract StrategyCRV {
         chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
     }
     
-    constructor(address _controller,address _swap) public {
+    constructor(address _controller) public {
         governance = tx.origin;
         controller = _controller;
         want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;
-        swap = _swap;
+        swap = 0xc3D50438150853A61f61Afe413FaCB81FbeE8d7e;
     }
     
     
