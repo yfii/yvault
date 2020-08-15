@@ -428,5 +428,8 @@ contract yVaultCRV is ERC20 {
             Yfiitoken.safeTransfer(msg.sender, out);
         }
     }
+    function getName() external pure returns (string memory) {
+        return "vaultCurve";
+    }
 
 }

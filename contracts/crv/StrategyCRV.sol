@@ -184,6 +184,7 @@ contract StrategyCRV  {
         uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
         chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
     }
+    //TODO: chi放在swap里,或者放在controller里面
     
     constructor(address _controller) public {
         governance = tx.origin;
@@ -303,5 +304,8 @@ contract StrategyCRV  {
     function setSwap(address _swap) external{
         require(msg.sender == governance, "!governance");
         swap = _swap;
+    }
+    function getName() external pure returns (string memory) {
+        return "StrategyCurveYCRV";
     }
 }
