@@ -352,9 +352,7 @@ contract yVaultCRV is ERC20 {
   function deposit(uint amount) external {
       token.safeTransferFrom(msg.sender, address(this), amount);
       plyr_[msg.sender].stake = plyr_[msg.sender].stake.add(amount);
-        if (global_[0].earnings_per_share == 0) {
-            plyr_[msg.sender].payout = plyr_[msg.sender].payout.add(0);
-        } else {
+        if (global_[0].earnings_per_share != 0) {
             plyr_[msg.sender].payout = plyr_[msg.sender].payout.add(
                 global_[0].earnings_per_share.mul(amount).sub(1).div(magnitude).add(1)
             );
