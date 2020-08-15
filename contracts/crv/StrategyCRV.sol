@@ -211,7 +211,8 @@ contract StrategyCRV  {
         require(msg.sender == controller, "!controller");
         uint _balance = IERC20(want).balanceOf(address(this));
         if (_balance < _amount) {
-            _withdrawSome(_amount.sub(_balance));
+            _amount = _withdrawSome(_amount.sub(_balance));
+            _amount = _amount.add(_balance);
         }
         
         address _vault = Controller(controller).vaults(address(want));
@@ -264,6 +265,7 @@ contract StrategyCRV  {
     
     function _withdrawSome(uint256 _amount) internal {
         CurveDeposit(curvedeposit).withdraw(_amount);
+        return _amount;
     }
     
     function balanceOfWant() public view returns (uint) {
