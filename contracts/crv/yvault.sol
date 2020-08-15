@@ -269,9 +269,6 @@ interface Controller {
     function rewards() external view returns (address);
 }
 
-interface IFreeFromUpTo {
-    function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
-}
 
 contract yVaultCRV is ERC20 {
   using SafeERC20 for IERC20;
@@ -305,16 +302,9 @@ contract yVaultCRV is ERC20 {
     mapping (address => uint256) public deposittime;
     uint256 constant internal magnitude = 10**40;
 
-    IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
 
-  modifier discountCHI {
-    uint256 gasStart = gasleft();
-    _;
-    uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
-    chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
-    }
 
 
   constructor (address _controller,address _token) public {
@@ -353,7 +343,7 @@ contract yVaultCRV is ERC20 {
       return token.balanceOf(address(this)).mul(min).div(max);
   }
   
-  function earn() public discountCHI{
+  function earn() public {
       uint _bal = available();
       token.safeTransfer(controller, _bal);
       Controller(controller).earn(address(token), _bal);
@@ -380,7 +370,7 @@ contract yVaultCRV is ERC20 {
   }
 
   // No rebalance implementation for lower fees and faster swaps
-  function withdraw(uint amount) external discountCHI{
+  function withdraw(uint amount) external {
       claim();
       require(amount<=plyr_[msg.sender].stake,"!balance");
       uint r = amount;
