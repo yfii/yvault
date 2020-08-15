@@ -307,8 +307,8 @@ contract yVaultCRV is ERC20 {
 
 
 
-  constructor (address _controller,address _token) public {
-      token = IERC20(_token);
+  constructor (address _controller) public {
+      token = IERC20(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
       Yfiitoken = IERC20(yfii);
       governance = tx.origin;
       controller = _controller;
