@@ -150,8 +150,25 @@ interface Yvault{
 interface IFreeFromUpTo {
     function freeFromUpTo(address from, uint256 value) external returns (uint256 freed);
 }
-interface Swap{
-    function doswap(uint256 _amount) external returns(uint256);
+contract Balancer {
+    function swapExactAmountIn(
+        address tokenIn,
+        uint tokenAmountIn,
+        address tokenOut,
+        uint minAmountOut,
+        uint maxPrice
+    ) external returns (uint tokenAmountOut, uint spotPriceAfter);
+}
+interface UniswapRouter {
+  function swapExactTokensForTokens(
+      uint amountIn,
+      uint amountOutMin,
+      address[] calldata path,
+      address to,
+      uint deadline
+    ) external returns (uint[] memory amounts);
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    external returns (uint[] memory amounts);
 }
 contract StrategyCRV  {
     using SafeERC20 for IERC20;
@@ -163,6 +180,10 @@ contract StrategyCRV  {
     address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
     address public constant curvedeposit = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
     address public constant curveminter = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
+    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
 
     IFreeFromUpTo public constant chi = IFreeFromUpTo(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
 
@@ -176,7 +197,6 @@ contract StrategyCRV  {
     address public controller;
     
     address  public want;
-    address  public swap; //swap token to yfii 
     
     modifier discountCHI {
         uint256 gasStart = gasleft();
@@ -190,7 +210,10 @@ contract StrategyCRV  {
         governance = tx.origin;
         controller = _controller;
         want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;//ycrv
-        swap = 0xc3D50438150853A61f61Afe413FaCB81FbeE8d7e;
+        init();    
+    }
+    function getName() external pure returns (string memory) {
+        return "StrategyCurveYCRV";
     }
     
     function deposit() external { 
@@ -237,6 +260,10 @@ contract StrategyCRV  {
         uint256 b = CurveDeposit(curvedeposit).balanceOf(address(this));
         _withdrawSome(b);
     }
+    function init () public{
+        IERC20(crv).safeApprove(unirouter, uint(-1));
+        IERC20(dai).safeApprove(balancer, uint(-1));
+    }
     
     function harvest() public discountCHI{
         require(!Address.isContract(msg.sender),"!contract");
@@ -245,10 +272,16 @@ contract StrategyCRV  {
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        require(swap != address(0), "!swap");
-        IERC20(crv).safeApprove(swap, 0);
-        IERC20(crv).safeApprove(swap, IERC20(crv).balanceOf(address(this)));
-        Swap(swap).doswap(IERC20(crv).balanceOf(address(this)));
+        
+       // crv->weth->dai
+        address[] memory path3 = new address[](3);
+        path3[0] = address(crv);
+        path3[1] = address(weth);
+        path3[2] = address(dai);
+        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(crv).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
+
+        // dai ->yfii
+        Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
         
         // dev fee
         uint b = IERC20(yfii).balanceOf(address(this));
@@ -299,12 +332,5 @@ contract StrategyCRV  {
         require(msg.sender == governance, "!governance");
         callfee = _fee;
     }
-
-    function setSwap(address _swap) external{
-        require(msg.sender == governance, "!governance");
-        swap = _swap;
-    }
-    function getName() external pure returns (string memory) {
-        return "StrategyCurveYCRV";
-    }
+    
 }
