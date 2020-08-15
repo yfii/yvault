@@ -264,7 +264,7 @@ contract StrategyCRV  {
         Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
     }
     
-    function _withdrawSome(uint256 _amount) internal {
+    function _withdrawSome(uint256 _amount) internal returns(uint256){
         CurveDeposit(curvedeposit).withdraw(_amount);
         return _amount;
     }
