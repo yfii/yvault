@@ -234,7 +234,6 @@ contract StrategyCRV  {
     }
     
     function _withdrawAll() internal { 
-        harvest();
         uint256 b = CurveDeposit(curvedeposit).balanceOf(address(this));
         _withdrawSome(b);
     }
