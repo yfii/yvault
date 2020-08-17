@@ -301,17 +301,19 @@ contract StrategyCRV  {
         return _amount;
     }
     
-    function balanceOfWant() public view returns (uint) {
-        return IERC20(want).balanceOf(address(this));
-    }
-    
-    function balanceOfCRV() public view returns (uint) {
+    function balanceOfMining() public view returns (uint) {//有多少钱进去挖矿了
         return CurveDeposit(curvedeposit).balanceOf(address(this));
     }
     
-    function balanceOf() public view returns (uint) {
-        return balanceOfWant();
+    function balanceOf() public view returns (uint) {//TVL vault+balanceOfMining
+        address _vault = Controller(controller).vaults(address(want));
+        return IERC20(want).balanceOf(address(_vault))+balanceOfMining();
                
+    }
+
+    function balanceOfPendingReward() public view returns(uint){ //还没有领取的收益有多少...
+        //TODO:crv算收益的有点复杂...到时候再看看
+        return 1;
     }
     
     function setGovernance(address _governance) external {
