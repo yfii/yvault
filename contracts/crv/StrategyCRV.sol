@@ -305,10 +305,8 @@ contract StrategyCRV  {
         return CurveDeposit(curvedeposit).balanceOf(address(this));
     }
     
-    function balanceOf() public view returns (uint) {//TVL vault+balanceOfMining
-        address _vault = Controller(controller).vaults(address(want));
-        return IERC20(want).balanceOf(address(_vault))+balanceOfMining();
-               
+    function balanceOf() public view returns (uint) {
+        return CurveDeposit(curvedeposit).balanceOf(address(this));       
     }
 
     function balanceOfPendingReward() public view returns(uint){ //还没有领取的收益有多少...

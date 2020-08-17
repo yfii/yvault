@@ -9,6 +9,8 @@ withdrawall-> Strategy.withdrawall
 
 withdraw  -> Strategy.withdraw
 
+balanceOf -> Strategy.balanceOf
+
 
 ## yvault:
 
@@ -20,6 +22,13 @@ withdraw:用户取钱。（钱不够触发。 Controller.withdraw
 
 claim: 用户领取分红
 
+make_profit: Strategy.harvest 触发分红.
+
+cal_out: 某个用户可领取的分红
+
+cal_out_pending: 某个用户在路上的分红（也就是分红还没有从挖矿合约领取.只能看到，无法领取，等harvest触发后就可以领取了）
+
+balanceOf: token.balanceOf(address(this)) + Controller.balanceOf (也就是TVL)
 
 ## Strategy
 
@@ -27,9 +36,13 @@ deposit: 存钱到某个合约 获取利息啥的
 
 withdraw: 从某个合约取钱出来
 
-withdrawall:
+withdrawall:  把所有的钱从挖矿合约退出.
 
 harvest: 领取分红.
+
+balanceOf: 存放在挖矿合约里面的钱
+
+balanceOfPendingReward：还未从挖矿合约领取的收益.
 
 
 ## yam 相关合约
