@@ -313,6 +313,9 @@ contract yVaultCRV is ERC20 {
       governance = tx.origin;
       controller = _controller;
   }
+  function getName() external pure returns (string memory) {
+        return "vaultCurve";
+  }
   
   function balance() public view returns (uint) {
       return token.balanceOf(address(this))
@@ -437,9 +440,6 @@ contract yVaultCRV is ERC20 {
             }
             Yfiitoken.safeTransfer(msg.sender, out);
         }
-    }
-    function getName() external pure returns (string memory) {
-        return "vaultCurve";
     }
 
 }
