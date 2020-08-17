@@ -409,6 +409,18 @@ contract yVaultCRV is ERC20 {
         } else {
             return _cal.sub(plyr_[user].payout);
         }
+    }    
+    function cal_out_pending(uint256 _pendingBalance,address user) public view returns (uint256) { 
+        uint256 _earnings_per_share = global_[0].earnings_per_share.add(
+            _pendingBalance.mul(magnitude).div(global_[0].total_stake)
+        );
+        uint256 _cal = _earnings_per_share.mul(plyr_[user].stake).div(magnitude);
+        _cal = _cal.sub(cal_out(user));
+        if (_cal < plyr_[user].payout) {
+            return 0;
+        } else {
+            return _cal.sub(plyr_[user].payout);
+        }
     }
     function claim() public { 
         uint256 out = cal_out(msg.sender);
