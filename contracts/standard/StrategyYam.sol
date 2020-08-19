@@ -279,6 +279,12 @@ contract Strategy {
         output = _output;
         pool = _pool;
         IERC20(output).safeApprove(unirouter, uint(-1));
+        getName = string(
+            abi.encodePacked("yfii:Strategy:", 
+                abi.encodePacked(IERC20(want).name(),
+                    abi.encodePacked(":",IERC20(output).name())
+                )
+            ));
 
     }
     
