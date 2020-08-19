@@ -47,5 +47,5 @@ strategy:
 ## WBTC
 
 token:0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
-vault:  
+vault: 0x2f4Ae3a95C7B457DB53706EEE8979aEca4ec0082
 strategy:
