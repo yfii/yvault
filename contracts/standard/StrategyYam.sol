@@ -206,6 +206,8 @@ contract Strategy {
 
     address  public want;
     
+    address[] public swapRouting;
+    
     constructor(address _output,address _pool,address _want) public {
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
@@ -219,6 +221,7 @@ contract Strategy {
                 )
             ));
         init(); 
+        swapRouting = [output,weth,yfii];
 
     }
     
@@ -267,7 +270,6 @@ contract Strategy {
     }
     function init () public{
         IERC20(output).safeApprove(unirouter, uint(-1));
-        IERC20(dai).safeApprove(balancer, uint(-1));
     }
 
     function setNewPool(address _output,address _pool) public{
@@ -278,7 +280,6 @@ contract Strategy {
         withdrawAll();
         output = _output;
         pool = _pool;
-        IERC20(output).safeApprove(unirouter, uint(-1));
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),
@@ -294,15 +295,8 @@ contract Strategy {
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        // output->weth->dai
-        address[] memory path3 = new address[](3);
-        path3[0] = address(output);
-        path3[1] = address(weth);
-        path3[2] = address(dai);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(output).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
-
-        // dai ->yfii
-        Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
+        //output -> eth ->yfii
+        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(output).balanceOf(address(this)), 0, swapRouting, address(this), now.add(1800));
 
         // fee
         uint b = IERC20(yfii).balanceOf(address(this));
@@ -354,5 +348,9 @@ contract Strategy {
     function setBurnFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         burnfee = _fee;
+    }
+    function setSwapRouting(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swapRouting = _path;
     }
 }
