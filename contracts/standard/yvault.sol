@@ -270,7 +270,7 @@ interface Controller {
 }
 
 
-contract yVaultCRV  {
+contract Vault  {
   using SafeERC20 for IERC20;
   using Address for address;
   using SafeMath for uint256;
@@ -281,40 +281,40 @@ contract yVaultCRV  {
   uint public min = 9500;
   uint public constant max = 10000;
 
-  uint public earnLowerlimit = 1e18*10000; //池内空余资金到这个值就自动earn
+  uint public earnLowerlimit; //池内空余资金到这个值就自动earn
   
   address public governance;
   address public controller;
 
-    struct Player {
+  struct Player {
         uint256 stake; // 总质押总数
         uint256 payout; //
         uint256 total_out; // 已经领取的分红
-    }
-    mapping(address => Player) public plyr_; // (player => data) player data
+  }
+  mapping(address => Player) public plyr_; // (player => data) player data
 
-    struct Global {
+  struct Global {
         uint256 total_stake; // 总质押总数
         uint256 total_out; //  总分红金额
         uint256 earnings_per_share; // 每股分红
-    }
-    mapping(uint256 => Global) public global_; // (global => data) global data
-    mapping (address => uint256) public deposittime;
-    uint256 constant internal magnitude = 10**40;
+  }
+  mapping(uint256 => Global) public global_; // (global => data) global data
+  mapping (address => uint256) public deposittime;
+  uint256 constant internal magnitude = 10**40;
 
-    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+  address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
+  string public getName;
 
+  constructor (address _token,uint256 _earnLowerlimit) public {
+      getName = name;
+      token = IERC20(_token);
+      getName = string(abi.encodePacked("yfii:Vault:", token.name())),
 
-
-  constructor (address _controller) public {
-      token = IERC20(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
+      earnLowerlimit = _earnLowerlimit*1e18;
       Yfiitoken = IERC20(yfii);
       governance = tx.origin;
-      controller = _controller;
-  }
-  function getName() external pure returns (string memory) {
-        return "vaultCurve";
+      controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
   }
   
   function balance() public view returns (uint) {
