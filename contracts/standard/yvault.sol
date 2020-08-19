@@ -307,9 +307,8 @@ contract Vault  {
   string public getName;
 
   constructor (address _token,uint256 _earnLowerlimit) public {
-      getName = name;
       token = IERC20(_token);
-      getName = string(abi.encodePacked("yfii:Vault:", token.name())),
+      getName = string(abi.encodePacked("yfii:Vault:", ERC20Detailed(_token).name()));
 
       earnLowerlimit = _earnLowerlimit*1e18;
       Yfiitoken = IERC20(yfii);
