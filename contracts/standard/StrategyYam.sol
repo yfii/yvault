@@ -12,6 +12,7 @@ interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
     function decimals() external view returns (uint);
+    function name() external view returns (string memory);
     function approve(address spender, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -180,13 +181,14 @@ interface Yvault{
     function make_profit(uint256 amount) external;
 }
 
-contract StrategyYam {
+contract Strategy {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public pool = address(0x587A07cE5c265A38Dd6d42def1566BA73eeb06F5);
-    address constant public yam = address(0x0e2298E3B3390e3b945a5456fBf59eCc3f55DA16);
+    address public pool;
+    address public output;
+    string public getName;
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
@@ -204,15 +206,20 @@ contract StrategyYam {
 
     address  public want;
     
-    constructor(address _controller) public {
+    constructor(address _output,address _pool,address _want) public {
         governance = tx.origin;
-        controller = _controller;
-        want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;
+        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
+        output = _output;
+        pool = _pool;
+        want = _want;
+        getName = string(
+            abi.encodePacked("yfii:Strategy:", 
+                abi.encodePacked(IERC20(want).name(),
+                    abi.encodePacked(":",IERC20(output).name())
+                )
+            ));
         init(); 
 
-    }
-    function getName() external pure returns (string memory) {
-        return "StrategyXXXXX";
     }
     
     function deposit() external { 
@@ -244,8 +251,8 @@ contract StrategyYam {
     }
     
     // Withdraw all funds, normally used when migrating strategies
-    function withdrawAll() external returns (uint balance) { 
-        require(msg.sender == controller, "!controller");
+    function withdrawAll() public returns (uint balance) { 
+        require(msg.sender == controller||msg.sender==governance, "!controller");
         _withdrawAll();
         balance = IERC20(want).balanceOf(address(this));
         
@@ -259,8 +266,20 @@ contract StrategyYam {
         Yam(pool).exit();
     }
     function init () public{
-        IERC20(yam).safeApprove(unirouter, uint(-1));
+        IERC20(output).safeApprove(unirouter, uint(-1));
         IERC20(dai).safeApprove(balancer, uint(-1));
+    }
+
+    function setNewPool(address _output,address _pool) public{
+        require(msg.sender == governance, "!governance");
+        //这边是切换池子以及挖到的代币
+        //先退出之前的池子.
+        harvest();
+        withdrawAll();
+        output = _output;
+        pool = _pool;
+        IERC20(output).safeApprove(unirouter, uint(-1));
+
     }
     
     function harvest() public {
@@ -269,12 +288,12 @@ contract StrategyYam {
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        // yam->weth->dai
+        // output->weth->dai
         address[] memory path3 = new address[](3);
-        path3[0] = address(yam);
+        path3[0] = address(output);
         path3[1] = address(weth);
         path3[2] = address(dai);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(yam).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
+        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(output).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
 
         // dai ->yfii
         Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
