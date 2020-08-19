@@ -319,5 +319,10 @@ contract StrategyCRV  {
         require(msg.sender == governance, "!governance");
         callfee = _fee;
     }
+    function setBurnFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        burnfee = _fee;
+    }
+    
     
 }
