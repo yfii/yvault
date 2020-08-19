@@ -138,6 +138,7 @@ interface CurveDeposit{
     function deposit(uint256) external;
     function withdraw(uint256) external;
     function balanceOf(address) external view returns (uint256);
+    function claimable_tokens(address) external view returns (uint256);
 }
 interface CurveMinter{
     function mint(address) external;
@@ -297,8 +298,7 @@ contract StrategyCRV  {
     }
 
     function balanceOfPendingReward() public view returns(uint){ //还没有领取的收益有多少...
-        //TODO:crv算收益的有点复杂...到时候再看看
-        return 1;
+        return CurveDeposit(curvedeposit).claimable_tokens(address(this));   
     }
     
     function setGovernance(address _governance) external {
