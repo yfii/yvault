@@ -194,7 +194,8 @@ contract StrategyYam {
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
     
-    uint public fee = 100;
+    uint public fee = 600;
+    uint public burnfee = 300;
     uint public callfee = 100;
     uint constant public max = 10000;
     
@@ -282,8 +283,10 @@ contract StrategyYam {
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
         uint _callfee = b.mul(callfee).div(max);
-        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //team 1%
+        uint _burnfee = b.mul(burnfee).div(max);
+        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //6%  5% team +1% insurance
         IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
+        IERC20(yfii).safeTransfer(address(0x6666666666666666666666666666666666666666), _burnfee); //burn fee 3%
 
         //把yfii 存进去分红.
         IERC20(yfii).safeApprove(_vault, 0);
@@ -322,5 +325,9 @@ contract StrategyYam {
     function setCallFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         callfee = _fee;
+    }    
+    function setBurnFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        burnfee = _fee;
     }
 }
