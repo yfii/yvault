@@ -329,8 +329,6 @@ contract Strategy {
             UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(pasta).balanceOf(address(this)), 0, path2, address(this), now.add(1800));
 
             //yycrv-> yvault-> ycrv
-            IERC20(yycrv).safeApprove(yycrv, 0);
-            IERC20(yycrv).safeApprove(yycrv, uint(-1));
             CrvYvault(yycrv).withdraw(IERC20(yycrv).balanceOf(address(this)));
 
             //ycrv -> weth-> yfii
