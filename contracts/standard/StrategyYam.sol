@@ -181,6 +181,9 @@ interface Yvault{
     function make_profit(uint256 amount) external;
 }
 
+interface CrvYvault{
+    function withdraw(uint _shares) external;
+}
 contract Strategy {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -195,6 +198,9 @@ contract Strategy {
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+    address constant public pasta = address(0x08A2E41FB99A7599725190B9C970Ad3893fa33CF);
+    address constant public yycrv = address(0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c);
+    address constant public ycrv = address(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
     
     uint public fee = 600;
     uint public burnfee = 300;
@@ -295,9 +301,7 @@ contract Strategy {
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        //output -> eth ->yfii
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(output).balanceOf(address(this)), 0, swapRouting, address(this), now.add(1800));
-
+        swap2yfii();
         // fee
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
@@ -311,6 +315,37 @@ contract Strategy {
         IERC20(yfii).safeApprove(_vault, 0);
         IERC20(yfii).safeApprove(_vault, IERC20(yfii).balanceOf(address(this)));
         Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
+    }
+
+    function swap2yfii() internal {
+        
+        if (output == pasta){
+            //pastd->yycrv  lp 
+            IERC20(pasta).safeApprove(unirouter, 0);
+            IERC20(pasta).safeApprove(unirouter, uint(-1));
+            address[] memory path2 = new address[](2);
+            path2[0] = address(pasta);
+            path2[1] = address(yycrv);
+            UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(pasta).balanceOf(address(this)), 0, path2, address(this), now.add(1800));
+
+            //yycrv-> yvault-> ycrv
+            IERC20(yycrv).safeApprove(yycrv, 0);
+            IERC20(yycrv).safeApprove(yycrv, uint(-1));
+            CrvYvault(yycrv).withdraw(IERC20(yycrv).balanceOf(address(this)));
+
+            //ycrv -> weth-> yfii
+            IERC20(ycrv).safeApprove(unirouter, 0);
+            IERC20(ycrv).safeApprove(unirouter, uint(-1));
+            address[] memory path3 = new address[](3);
+            path3[0] = address(ycrv);
+            path3[1] = address(weth);
+            path3[2] = address(yfii);
+            UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(ycrv).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
+        }else{
+            //output -> eth ->yfii
+            UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(output).balanceOf(address(this)), 0, swapRouting, address(this), now.add(1800));
+        }
+
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
