@@ -130,6 +130,14 @@ interface UniswapRouter {
     ) external returns (uint[] memory amounts);
     function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
     external returns (uint[] memory amounts);
+
+    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+        ) external;
 }
 
 contract Swap {
@@ -163,7 +171,7 @@ contract Swap {
         address[] memory path2 = new address[](2);
         path2[0] = address(pasta);
         path2[1] = address(yycrv);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(pasta).balanceOf(address(this)), 0, path2, address(this), now.add(1800));
+        UniswapRouter(unirouter).swapExactTokensForTokensSupportingFeeOnTransferTokens(IERC20(pasta).balanceOf(address(this)), 0, path2, address(this), now.add(1800));
 
         //yycrv-> yvault-> ycrv
         CrvYvault(yycrv).withdraw(IERC20(yycrv).balanceOf(address(this)));
