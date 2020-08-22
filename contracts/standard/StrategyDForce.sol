@@ -155,7 +155,22 @@ interface dERC20 {
 }
 
 interface UniswapRouter {
-    function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
+  function swapExactTokensForTokens(
+      uint amountIn,
+      uint amountOutMin,
+      address[] calldata path,
+      address to,
+      uint deadline
+    ) external returns (uint[] memory amounts);
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    external returns (uint[] memory amounts);
+  function swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+        ) external;
 }
 
 contract StrategyDForce {
@@ -244,7 +259,7 @@ contract StrategyDForce {
     
     // Withdraw all funds, normally used when migrating strategies
     function withdrawAll() external returns (uint balance) {
-        require(msg.sender == controller, "!controller");
+        require(msg.sender == controller||msg.sender==governance, "!controller");
         _withdrawAll();
         
         
