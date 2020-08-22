@@ -200,6 +200,10 @@ contract StrategyDForce {
 
     address[] public swapRouting;
     
+    // output: 挖到的代币
+    // pool: 质押的池子
+    // want: 用户存进来的代币
+    // d: dToken的地址  USDT->dUSDT ,DAU->dDAI ,USDC->dUSDC
     constructor(address _output,address _pool,address _want,address _d) public {
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
