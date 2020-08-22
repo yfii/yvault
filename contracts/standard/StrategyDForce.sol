@@ -182,9 +182,9 @@ contract StrategyDForce {
     string public getName;
     address public want;
     address public pool;
+    address public d;
     
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address constant public d = address(0x868277d475E0e475E38EC5CdA2d9C83B5E1D9fc8);
     address constant public df = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for df <> weth <> usdc route
@@ -200,12 +200,13 @@ contract StrategyDForce {
 
     address[] public swapRouting;
     
-    constructor(address _output,address _pool,address _want) public {
+    constructor(address _output,address _pool,address _want,address _d) public {
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         output = _output;
         pool = _pool;
         want = _want;
+        d = _d;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),
