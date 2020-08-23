@@ -204,19 +204,18 @@ contract StrategyDForce {
     // pool: 质押的池子
     // want: 用户存进来的代币
     // d: dToken的地址  USDT->dUSDT ,DAU->dDAI ,USDC->dUSDC
-    constructor(address _output,address _pool,address _want,address _d) public {
+    constructor(address _pool,address _want,address _d) public {
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
-        output = _output;
+        output = 0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0;
         pool = _pool;
         want = _want;
         d = _d;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
-                abi.encodePacked(IERC20(want).name(),
-                    abi.encodePacked(":",IERC20(output).name())
+                abi.encodePacked(IERC20(want).name(),"DF Token")
                 )
-            ));
+            );
         init(); 
         swapRouting = [output,weth,yfii];//df->weth->yfii
     }
