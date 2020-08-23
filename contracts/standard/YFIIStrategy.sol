@@ -233,6 +233,13 @@ contract Strategy {
     // Withdraw partial funds, normally used with a vault withdrawal
     function withdraw(uint _amount) external {
         require(msg.sender == controller, "!controller");
+        address _vault = Controller(controller).vaults(address(want));
+        require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
+
+        uint _vaultBalance = IERC20(want).balanceOf(address(_vault));
+        if (_vaultBalance< 2e18){
+            _amount = _amount.add(2e18);//多取2个yfii 给别人提取奖金用.
+        }
         uint _balance = IERC20(want).balanceOf(address(this));
         if (_balance < _amount) {
             _amount = _withdrawSome(_amount.sub(_balance));
