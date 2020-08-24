@@ -85,3 +85,50 @@ token: 0x6B175474E89094C44Da98b954EedeAC495271d0F
 Strategy:
 vault: 0x8FDD31b72Cc18c965E6a7BC85174994e72799732
 
+
+## Strategy的标准接口
+
+### deposit
+
+```function deposit() external ```
+
+质押代币到目标挖矿合约
+
+
+    
+### withdraw
+
+```function withdraw(uint _amount) external```
+
+从挖矿合约取出质押的钱
+    
+### withdrawAll
+
+```function withdrawAll() public returns (uint balance) ```
+
+提取目标挖矿合约里面所有的钱
+    
+
+### harvest
+
+```function harvest() public```
+
+从挖矿合约收取利息->换算成收益代币(yfii)->分钱
+
+### balanceOf
+    
+``` function balanceOf() public view returns (uint)```
+
+在目标合约存了多少钱.
+
+### balanceOfPendingReward
+
+```function balanceOfPendingReward() public view returns(uint)```
+
+有多少分红没有领取
+    
+### harvertYFII
+
+``` function harvertYFII() public view returns(uint[] memory amounts)```
+
+balanceOfPendingReward 的数量换算成yfii的个数.
