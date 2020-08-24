@@ -246,8 +246,6 @@ contract Strategy {
             _amount = _amount.add(_balance);
         }
         
-        address _vault = Controller(controller).vaults(address(want));
-        require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
         IERC20(want).safeTransfer(_vault, _amount);
     }
     
