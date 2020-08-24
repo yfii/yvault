@@ -161,6 +161,7 @@ interface UniswapRouter {
         address to,
         uint deadline
         ) external;
+  function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
 }
 
 
@@ -315,6 +316,11 @@ contract Strategy {
     }
     function balanceOfPendingReward() public view returns(uint){ //还没有领取的收益有多少...
         return Yam(pool).earned(address(this));
+    }
+
+    function harvertYFII() public view returns(uint[] memory amounts){ //未收割的token 能换成多少yfii
+        return UniswapRouter(unirouter).getAmountsOut(balanceOfPendingReward(),swapRouting);
+        //https://uniswap.org/docs/v2/smart-contracts/router02/#getamountsout
     }
     
     function setGovernance(address _governance) external {
