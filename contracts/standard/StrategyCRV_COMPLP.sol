@@ -170,7 +170,6 @@ contract StrategyCRV  {
     
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address public constant curvedeposit = address(0x7ca5b0a2910B33e9759DC7dDB0413949071D7575);
     address public constant curveminter = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
@@ -186,14 +185,16 @@ contract StrategyCRV  {
     address public controller;
     
     address  public want;
+    address  public curvedeposit;
     address[] public swapRouting;
     string public getName;
     
     
-    constructor(address _want) public {
+    constructor(address _want,address _pool) public {
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         want = _want;
+        curvedeposit = _pool;
         init();
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
