@@ -195,7 +195,6 @@ contract StrategyCRV  {
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         want = _want;
         curvedeposit = _pool;
-        init();
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),
@@ -251,6 +250,7 @@ contract StrategyCRV  {
         _withdrawSome(b);
     }
     function init () public{
+        IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
     }
     
