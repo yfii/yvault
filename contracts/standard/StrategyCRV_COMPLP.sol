@@ -12,6 +12,7 @@ interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
     function decimals() external view returns (uint);
+    function name() external view returns (string memory);
     function approve(address spender, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -148,15 +149,7 @@ interface CurveMinter{
 interface Yvault{
     function make_profit(uint256 amount) external;
 }
-contract Balancer {
-    function swapExactAmountIn(
-        address tokenIn,
-        uint tokenAmountIn,
-        address tokenOut,
-        uint minAmountOut,
-        uint maxPrice
-    ) external returns (uint tokenAmountOut, uint spotPriceAfter);
-}
+
 interface UniswapRouter {
   function swapExactTokensForTokens(
       uint amountIn,
@@ -167,6 +160,8 @@ interface UniswapRouter {
     ) external returns (uint[] memory amounts);
     function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
     external returns (uint[] memory amounts);
+    function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
+
 }
 contract StrategyCRV  {
     using SafeERC20 for IERC20;
@@ -175,13 +170,11 @@ contract StrategyCRV  {
     
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
-    address public constant curvedeposit = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
+    address public constant curvedeposit = address(0x7ca5b0a2910B33e9759DC7dDB0413949071D7575);
     address public constant curveminter = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    address constant public balancer = address(0x16cAC1403377978644e78769Daa49d8f6B6CF565);
+    address constant public output = address(0xD533a949740bb3306d119CC777fa900bA034cd52); //crv
     
     
     uint public fee = 600;
@@ -193,16 +186,23 @@ contract StrategyCRV  {
     address public controller;
     
     address  public want;
+    address[] public swapRouting;
+    string public getName;
     
     
-    constructor(address _controller) public {
+    constructor(address _controller,address _want) public {
         governance = tx.origin;
-        controller = _controller;
-        want = 0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8;//ycrv
-        init();    
-    }
-    function getName() external pure returns (string memory) {
-        return "StrategyCurveYCRV";
+        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
+        want = _want;
+        init();
+        getName = string(
+            abi.encodePacked("yfii:Strategy:", 
+                abi.encodePacked(IERC20(want).name(),
+                    abi.encodePacked(":",IERC20(output).name())
+                )
+            ));
+        init(); 
+        swapRouting = [output,weth,yfii];//crv->weth->yfii
     }
     
     function deposit() external { 
@@ -250,8 +250,7 @@ contract StrategyCRV  {
         _withdrawSome(b);
     }
     function init () public{
-        IERC20(crv).safeApprove(unirouter, uint(-1));
-        IERC20(dai).safeApprove(balancer, uint(-1));
+        IERC20(output).safeApprove(unirouter, uint(-1));
     }
     
     function harvest() public {
@@ -262,15 +261,7 @@ contract StrategyCRV  {
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
         
-       // crv->weth->dai
-        address[] memory path3 = new address[](3);
-        path3[0] = address(crv);
-        path3[1] = address(weth);
-        path3[2] = address(dai);
-        UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(crv).balanceOf(address(this)), 0, path3, address(this), now.add(1800));
-
-        // dai ->yfii
-        Balancer(balancer).swapExactAmountIn(dai, IERC20(dai).balanceOf(address(this)), yfii, 0, uint(-1));
+        swap2yfii();
         
         // dev fee
         uint b = IERC20(yfii).balanceOf(address(this));
@@ -286,6 +277,10 @@ contract StrategyCRV  {
         IERC20(yfii).safeApprove(_vault, IERC20(yfii).balanceOf(address(this)));
         Yvault(_vault).make_profit(IERC20(yfii).balanceOf(address(this)));
     }
+    function swap2yfii() internal {
+            //output -> eth ->yfii
+            UniswapRouter(unirouter).swapExactTokensForTokens(IERC20(output).balanceOf(address(this)), 0, swapRouting, address(this), now.add(1800));
+    }
     
     function _withdrawSome(uint256 _amount) internal returns(uint256){
         CurveDeposit(curvedeposit).withdraw(_amount);
@@ -299,6 +294,10 @@ contract StrategyCRV  {
 
     function balanceOfPendingReward() public view returns(uint){ //还没有领取的收益有多少...
         return CurveDeposit(curvedeposit).claimable_tokens(address(this));   
+    }
+    function harvertYFII() public view returns(uint[] memory amounts){ //未收割的token 能换成多少yfii
+        return UniswapRouter(unirouter).getAmountsOut(balanceOfPendingReward(),swapRouting);
+        //https://uniswap.org/docs/v2/smart-contracts/router02/#getamountsout
     }
     
     function setGovernance(address _governance) external {
@@ -322,6 +321,10 @@ contract StrategyCRV  {
     function setBurnFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         burnfee = _fee;
+    }
+    function setSwapRouting(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swapRouting = _path;
     }
     
     
