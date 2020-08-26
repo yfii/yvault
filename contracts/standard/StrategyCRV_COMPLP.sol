@@ -190,7 +190,7 @@ contract StrategyCRV  {
     string public getName;
     
     
-    constructor(address _controller,address _want) public {
+    constructor(address _want) public {
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         want = _want;
