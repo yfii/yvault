@@ -7,8 +7,7 @@ w3url = "https://mainnet.infura.io/v3/998f64f3627548bbaf2630599c1eefca"
 w3 = Web3(HTTPProvider(w3url))
 
 with open("abi/Yvault.json") as f:
-    data = json.loads(f.read())
-    abi = data["abi"]
+    abi = json.loads(f.read())
 
 
 def get_total_out(contract_address):
