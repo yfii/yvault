@@ -15,4 +15,4 @@ python 3
 
 目前生产合约都在 **contracts/standard**下面
 
-生产用的合约在 **contracts/standard/config.json**
+生产用的合约在 [合约配置](https://raw.githubusercontent.com/yfii/yvault/master/contracts/standard/config.json)
