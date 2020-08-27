@@ -6,7 +6,7 @@ w3url = "https://mainnet.infura.io/v3/998f64f3627548bbaf2630599c1eefca"
 
 w3 = Web3(HTTPProvider(w3url))
 
-with open("abi/Yvault.json") as f:
+with open("abi/vault.json") as f:
     abi = json.loads(f.read())
 
 
