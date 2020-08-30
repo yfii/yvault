@@ -277,6 +277,7 @@ contract iVault is ERC20, ERC20Detailed {
     
     uint public min = 9500;
     uint public constant max = 10000;
+    uint public earnLowerlimit; //池内空余资金到这个值就自动earn
     
     address public governance;
     address public controller;
@@ -310,6 +311,10 @@ contract iVault is ERC20, ERC20Detailed {
         require(msg.sender == governance, "!governance");
         controller = _controller;
     }
+    function setEarnLowerlimit(uint256 _earnLowerlimit) public{
+      require(msg.sender == governance, "!governance");
+      earnLowerlimit = _earnLowerlimit;
+  }
     
     // Custom logic in here for how much the vault allows to be borrowed
     // Sets minimum required on-hand to keep small withdrawals cheap
@@ -340,6 +345,9 @@ contract iVault is ERC20, ERC20Detailed {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
         _mint(msg.sender, shares);
+        if (token.balanceOf(address(this))>earnLowerlimit){
+          earn();
+        }
     }
     
     function withdrawAll() external {
@@ -347,12 +355,6 @@ contract iVault is ERC20, ERC20Detailed {
     }
     
     
-    // Used to swap any borrowed reserve over the debt limit to liquidate to 'token'
-    function harvest(address reserve, uint amount) external {
-        require(msg.sender == controller, "!controller");
-        require(reserve != address(token), "token");
-        IERC20(reserve).safeTransfer(controller, amount);
-    }
     
     // No rebalance implementation for lower fees and faster swaps
     function withdraw(uint _shares) public {
