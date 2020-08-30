@@ -176,6 +176,10 @@ contract Strategy {
     uint public callfee = 100;
     uint public burnfee = 500;
     uint constant public max = 1000;
+
+
+    uint public withdrawalFee = 10;
+    uint constant public withdrawalMax = 10000;
     
     address public governance;
     address public controller;
@@ -225,10 +229,13 @@ contract Strategy {
             _amount = _withdrawSome(_amount.sub(_balance));
             _amount = _amount.add(_balance);
         }
+
+        uint _fee = _amount.mul(withdrawalFee).div(withdrawalMax);        
+        IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
         
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
-        IERC20(want).safeTransfer(_vault, _amount);
+        IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
     }
     
     // Withdraw all funds, normally used when migrating strategies
@@ -345,5 +352,9 @@ contract Strategy {
     function setswap2TokenRouting(address[] memory _path) public{
         require(msg.sender == governance, "!governance");
         swap2TokenRouting = _path;
+    }
+    function setWithdrawalFee(uint _withdrawalFee) external {
+        require(msg.sender == governance, "!governance");
+        withdrawalFee = _withdrawalFee;
     }
 }
