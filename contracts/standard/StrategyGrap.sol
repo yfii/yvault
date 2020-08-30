@@ -194,7 +194,7 @@ contract Strategy {
 
     address  public want;
     
-    address[] public swapRouting;
+    // address[] public swapRouting;
     
     constructor(address _output,address _pool,address _want) public {
         governance = tx.origin;
@@ -208,8 +208,8 @@ contract Strategy {
                     abi.encodePacked(":",IERC20(output).name())
                 )
             ));
-        init(); 
-        swapRouting = [output,ycrv,weth,yfii];//grap->ycrv -> weth->yfii
+        // init(); 
+        // swapRouting = [output,ycrv,weth,yfii];//grap->ycrv -> weth->yfii
 
     }
     
@@ -283,7 +283,7 @@ contract Strategy {
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
 
-        swap2yfii();
+        // swap2yfii();
         // fee
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
