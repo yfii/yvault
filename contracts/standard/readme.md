@@ -120,6 +120,16 @@ Strategy: 0xEfb684AB29371e701CCe3CA9e3FD8f5E33042eee
 
 vault: 0xf811c062D14fdF9Fda95D6A2C54e137afE80De45
 
+## usdx/usdc lp dforce 
+
+pool:https://cn.etherscan.com/address/0xa94e2074beb6d1bf28014b81ff2062eab3600c48#code
+
+token: 0x460067f15e9B461a5F4c482E80217A2F45269385
+
+Strategy: 
+
+vault: 
+
 ## Strategy的标准接口
 
 ### deposit
