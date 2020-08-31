@@ -268,7 +268,7 @@ interface Controller {
     function earn(address, uint) external;
 }
 
-contract iVault is ERC20, ERC20Detailed {
+contract rVault is ERC20, ERC20Detailed {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -282,14 +282,14 @@ contract iVault is ERC20, ERC20Detailed {
     address public governance;
     address public controller;
     
-    constructor (address _token, address _controller) public ERC20Detailed(
+    constructor (address _token) public ERC20Detailed(
         string(abi.encodePacked("yfii ", ERC20Detailed(_token).name())),
-        string(abi.encodePacked("i", ERC20Detailed(_token).symbol())),
+        string(abi.encodePacked("r", ERC20Detailed(_token).symbol())),
         ERC20Detailed(_token).decimals()
     ) {
         token = IERC20(_token);
-        governance = msg.sender;
-        controller = _controller;
+        governance = tx.origin;
+        controller = 0xe14e60d0f7fb15b1a98fde88a3415c17b023bf36;
     }
     
     function balance() public view returns (uint) {
