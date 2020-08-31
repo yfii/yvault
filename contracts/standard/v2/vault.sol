@@ -282,7 +282,7 @@ contract iVault is ERC20, ERC20Detailed {
     address public governance;
     address public controller;
     
-    constructor (address _token) public ERC20Detailed(
+    constructor (address _token,uint _earnLowerlimit) public ERC20Detailed(
         string(abi.encodePacked("yfii ", ERC20Detailed(_token).name())),
         string(abi.encodePacked("i", ERC20Detailed(_token).symbol())),
         ERC20Detailed(_token).decimals()
@@ -290,6 +290,7 @@ contract iVault is ERC20, ERC20Detailed {
         token = IERC20(_token);
         governance = tx.origin;
         controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
+        earnLowerlimit = _earnLowerlimit;
     }
     
     function balance() public view returns (uint) {
