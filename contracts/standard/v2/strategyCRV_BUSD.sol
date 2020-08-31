@@ -206,6 +206,10 @@ contract StrategyCRV  {
     uint public burnfee = 300;
     uint public callfee = 100;
     uint constant public max = 1000;
+
+    uint public withdrawalFee = 0;
+    uint constant public withdrawalMax = 10000;
+    
     
     address public burnAddress = 0x6666666666666666666666666666666666666666;
 
@@ -236,7 +240,7 @@ contract StrategyCRV  {
         swap2TokenRouting = [output,weth,dai]; 
     }
     
-    function deposit() external { 
+    function deposit() public { 
         IERC20(want).safeApprove(curvedeposit, 0);
         IERC20(want).safeApprove(curvedeposit, IERC20(want).balanceOf(address(this)));
         CurveDeposit(curvedeposit).deposit(IERC20(want).balanceOf(address(this)));
@@ -258,10 +262,15 @@ contract StrategyCRV  {
             _amount = _withdrawSome(_amount.sub(_balance));
             _amount = _amount.add(_balance);
         }
+        uint _fee = 0;
+        if (withdrawalFee>0){
+            _fee = _amount.mul(withdrawalFee).div(withdrawalMax);        
+            IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
+        }
         
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
-        IERC20(want).safeTransfer(_vault, _amount);
+        IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
     }
     
     // Withdraw all funds, normally used when migrating strategies
@@ -342,10 +351,6 @@ contract StrategyCRV  {
     function balanceOfPendingReward() public view returns(uint){ //还没有领取的收益有多少...
         return CurveDeposit(curvedeposit).claimable_tokens(address(this));   
     }
-    function harvertYFII() public view returns(uint[] memory amounts){ //未收割的token 能换成多少yfii
-        return UniswapRouter(unirouter).getAmountsOut(balanceOfPendingReward(),swapRouting);
-        //https://uniswap.org/docs/v2/smart-contracts/router02/#getamountsout
-    }
     
     function setGovernance(address _governance) external {
         require(msg.sender == governance, "!governance");
@@ -372,6 +377,12 @@ contract StrategyCRV  {
     function setBurnAddress(address _burnAddress) public{
         require(msg.sender == governance, "!governance");
         burnAddress = _burnAddress;
+    }
+
+    function setWithdrawalFee(uint _withdrawalFee) external {
+        require(msg.sender == governance, "!governance");
+        require(_withdrawalFee <=100,"fee >= 1%"); //max:1%
+        withdrawalFee = _withdrawalFee;
     }
     
     
