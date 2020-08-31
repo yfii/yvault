@@ -268,7 +268,7 @@ interface Controller {
     function earn(address, uint) external;
 }
 
-contract rVault is ERC20, ERC20Detailed {
+contract iVault is ERC20, ERC20Detailed {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -284,7 +284,7 @@ contract rVault is ERC20, ERC20Detailed {
     
     constructor (address _token) public ERC20Detailed(
         string(abi.encodePacked("yfii ", ERC20Detailed(_token).name())),
-        string(abi.encodePacked("r", ERC20Detailed(_token).symbol())),
+        string(abi.encodePacked("i", ERC20Detailed(_token).symbol())),
         ERC20Detailed(_token).decimals()
     ) {
         token = IERC20(_token);
