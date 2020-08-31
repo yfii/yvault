@@ -129,7 +129,7 @@ token: 0x3b3ac5386837dc563660fb6a0937dfaa5924333b
 
 Strategy:
 
-vault: 
+vault: 0xf4485B4f10C388d5b09DB36bA8adD2ceEA1E040B
 
 ## usdx/usdc lp dforce 
 
