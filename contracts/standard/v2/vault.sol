@@ -289,7 +289,7 @@ contract iVault is ERC20, ERC20Detailed {
     ) {
         token = IERC20(_token);
         governance = tx.origin;
-        controller = 0xe14e60d0f7fb15b1a98fde88a3415c17b023bf36;
+        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
     }
     
     function balance() public view returns (uint) {
