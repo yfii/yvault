@@ -123,6 +123,14 @@ Strategy: 0xEfb684AB29371e701CCe3CA9e3FD8f5E33042eee
 
 vault: 0xf811c062D14fdF9Fda95D6A2C54e137afE80De45
 
+## Curve.fi: bCrv Token (Curve.fi yDAI/yUSDC/yUSDT/yBUSD)
+
+token: 0x3b3ac5386837dc563660fb6a0937dfaa5924333b
+
+Strategy:
+
+vault: 0xf4485B4f10C388d5b09DB36bA8adD2ceEA1E040B
+
 ## usdx/usdc lp dforce 
 
 pool:https://cn.etherscan.com/address/0xa94e2074beb6d1bf28014b81ff2062eab3600c48#code
