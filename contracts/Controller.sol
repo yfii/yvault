@@ -198,6 +198,7 @@ contract Controller {
     }
     
     function setVault(address _token, address _vault) public {
+        //TODO:加个Event 添加新的策略了.
         require(msg.sender == governance, "!governance");
         vaults[_token] = _vault;
     }
