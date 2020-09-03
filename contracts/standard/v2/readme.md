@@ -14,7 +14,7 @@
 用户提现
 
 1. withdrawAll
-2. withdraw
+2. withdraw(uint _amount)
 
 计算用户收入
 
