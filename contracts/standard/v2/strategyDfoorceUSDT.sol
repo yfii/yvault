@@ -12,6 +12,7 @@ interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
     function decimals() external view returns (uint);
+    function name() external view returns (string memory);
     function approve(address spender, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -286,7 +287,6 @@ contract StrategyDForceUSDT {
     }
 
     function doswap() internal {
-        //output -> eth ->yfii
         uint256 _2token = IERC20(output).balanceOf(address(this)).mul(90).div(100); //90%
         uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
         UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
