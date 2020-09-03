@@ -189,13 +189,12 @@ contract StrategyDForceUSDT {
     address[] public swap2TokenRouting;
     
     
-    constructor(address _controller) public {
+    constructor() public {
         governance = msg.sender;
-        controller = _controller;
+        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
-                abi.encodePacked(IERC20(want).name(),
-                    abi.encodePacked(":",IERC20(df).name())
+                abi.encodePacked(IERC20(want).name(),"DF Token"
                 )
             ));
         swap2YFIIRouting = [output,weth,yfii];
