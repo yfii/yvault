@@ -144,7 +144,7 @@ interface Mintr {
     function mint(address) external;
 }
 
-interface Uni {
+interface UniswapRouter {
     function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
 }
 
@@ -182,54 +182,61 @@ contract StrategyCurveYCRVVoter {
     address constant public pool = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
     address constant public mintr = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
     address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
-    address constant public uni = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    address constant public output = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
+    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for crv <> weth <> dai route
     
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
     address constant public ydai = address(0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01);
     address constant public curve = address(0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51);
+
+    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+
     
-    uint public keepCRV = 1000;
-    uint constant public keepCRVMax = 10000;
-    
-    uint public performanceFee = 500;
-    uint constant public performanceMax = 10000;
-    
-    uint public withdrawalFee = 50;
+    uint public fee = 400;
+    uint public burnfee = 500;
+    uint public callfee = 100;
+    uint constant public max = 1000;
+
+    uint public withdrawalFee = 0;
     uint constant public withdrawalMax = 10000;
     
     address public governance;
     address public controller;
-    address public strategist;
+    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
+
+    string public getName;
+
+    address[] public swap2YFIIRouting;
+    address[] public swap2TokenRouting;
+
     
-    constructor(address _controller) public {
-        governance = msg.sender;
-        strategist = msg.sender;
-        controller = _controller;
+    constructor() public {
+        governance = tx.origin;
+        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        getName = string(
+            abi.encodePacked("yfii:Strategy:", 
+                abi.encodePacked(IERC20(want).name(),
+                    abi.encodePacked(":",IERC20(output).name())
+                )
+            ));
+        swap2YFIIRouting = [output,weth,yfii];
+        swap2TokenRouting = [output,weth,dai];
+        doApprove();
+        
+    }
+
+    function doApprove () public{
+        IERC20(output).safeApprove(unirouter, 0);
+        IERC20(output).safeApprove(unirouter, uint(-1));
+        IERC20(dai).safeApprove(ydai, 0);
+        IERC20(dai).safeApprove(ydai, uint(-1));
+        IERC20(ydai).safeApprove(curve, 0);
+        IERC20(ydai).safeApprove(curve, uint(-1));
     }
     
     function getName() external pure returns (string memory) {
         return "StrategyCurveYCRVVoter";
-    }
-    
-    function setStrategist(address _strategist) external {
-        require(msg.sender == governance, "!governance");
-        strategist = _strategist;
-    }
-    
-    function setKeepCRV(uint _keepCRV) external {
-        require(msg.sender == governance, "!governance");
-        keepCRV = _keepCRV;
-    }
-    
-    function setWithdrawalFee(uint _withdrawalFee) external {
-        require(msg.sender == governance, "!governance");
-        withdrawalFee = _withdrawalFee;
-    }
-    
-    function setPerformanceFee(uint _performanceFee) external {
-        require(msg.sender == governance, "!governance");
-        performanceFee = _performanceFee;
     }
     
     function deposit() public {
@@ -262,9 +269,12 @@ contract StrategyCurveYCRVVoter {
             _amount = _amount.add(_balance);
         }
         
-        uint _fee = _amount.mul(withdrawalFee).div(withdrawalMax);
+        uint _fee = 0;
+        if (withdrawalFee>0){
+            _fee = _amount.mul(withdrawalFee).div(withdrawalMax);        
+            IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
+        }
         
-        IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
         
@@ -289,44 +299,38 @@ contract StrategyCurveYCRVVoter {
     }
     
     function harvest() public {
-        require(msg.sender == strategist || msg.sender == governance, "!authorized");
+        require(!Address.isContract(msg.sender),"!contract");
         Mintr(mintr).mint(pool);
-        uint _crv = IERC20(crv).balanceOf(address(this));
-        if (_crv > 0) {
-            
-            uint _keepCRV = _crv.mul(keepCRV).div(keepCRVMax);
-            IERC20(crv).safeTransfer(Controller(controller).rewards(), _keepCRV);
-            _crv = _crv.sub(_keepCRV);
-            
-            
-            IERC20(crv).safeApprove(uni, 0);
-            IERC20(crv).safeApprove(uni, _crv);
-            
-            address[] memory path = new address[](3);
-            path[0] = crv;
-            path[1] = weth;
-            path[2] = dai;
-            
-            Uni(uni).swapExactTokensForTokens(_crv, uint(0), path, address(this), now.add(1800));
-        }
+        
+        doswap();
+        dosplit();
+        deposit();
+        
+    }
+    function doswap() internal {
+        uint256 _2token = IERC20(output).balanceOf(address(this)).mul(90).div(100); //90%
+        uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
+        UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
+        UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
+
         uint _dai = IERC20(dai).balanceOf(address(this));
         if (_dai > 0) {
-            IERC20(dai).safeApprove(ydai, 0);
-            IERC20(dai).safeApprove(ydai, _dai);
             yERC20(ydai).deposit(_dai);
         }
         uint _ydai = IERC20(ydai).balanceOf(address(this));
         if (_ydai > 0) {
-            IERC20(ydai).safeApprove(curve, 0);
-            IERC20(ydai).safeApprove(curve, _ydai);
             ICurveFi(curve).add_liquidity([_ydai,0,0,0],0);
         }
-        uint _want = IERC20(want).balanceOf(address(this));
-        if (_want > 0) {
-            uint _fee = _want.mul(performanceFee).div(performanceMax);
-            IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
-            deposit();
-        }
+
+    }
+    function dosplit() internal{
+        uint b = IERC20(yfii).balanceOf(address(this));
+        uint _fee = b.mul(fee).div(max);
+        uint _callfee = b.mul(callfee).div(max);
+        uint _burnfee = b.mul(burnfee).div(max);
+        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //4%  3% team +1% insurance
+        IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
+        IERC20(yfii).safeTransfer(burnAddress, _burnfee); //burn fee 5%
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
@@ -355,5 +359,27 @@ contract StrategyCurveYCRVVoter {
     function setController(address _controller) external {
         require(msg.sender == governance, "!governance");
         controller = _controller;
+    }
+    function setFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        fee = _fee;
+    }
+    function setCallFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        callfee = _fee;
+    }
+    function setBurnFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        burnfee = _fee;
+    }
+    function setBurnAddress(address _burnAddress) public{
+        require(msg.sender == governance, "!governance");
+        burnAddress = _burnAddress;
+    }
+
+    function setWithdrawalFee(uint _withdrawalFee) external {
+        require(msg.sender == governance, "!governance");
+        require(_withdrawalFee <=100,"fee >= 1%"); //max:1%
+        withdrawalFee = _withdrawalFee;
     }
 }
