@@ -40,15 +40,15 @@ abi文件参考 [Strategy](abi/strategy.json)
 ### 操作
 `function deposit(uint amount)` 用户入金  需要先对vault合约进行代币授权
 
-`function withdraw(uint amount)` 用户提现（提现的时候会自动把分红领取了）
-
-`function claim() public` 用户领取分红
+`function withdraw(uint amount)` 用户提现
 
 ### 读
 
-`function cal_out(address user) public view returns (uint256)` 查看用户待领取的收益
+`function balanceOf(address user) public view returns (uint256)` 查看用户有的iToken数量
 
-`function plyr_(address user) public view`  查看用户入金金额 这边是返回一个list,第一个是用户入金金额
+`function getPricePerFullShare() public view returns (uint)`  查看每个iToken换回原来token的比例
 
-`function deposittime(address user) public view`  返回用户入金时间.返回的是时间戳...需要大于24小时后领取收益,否则收益为 （当前时间-入金时间)*24h*cal_out的金额
+这边返回的值需要 除以1e18
+
+可以换回原来代币的数量为: 用户持有的iToken数量*getPricePerFullShare/1e18 
 
