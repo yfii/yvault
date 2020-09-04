@@ -170,6 +170,10 @@ contract Controller {
     
     uint public split = 5000;
     uint public constant max = 10000;
+
+
+    event NewVault(address indexed _token, address indexed _vault);
+
     
     constructor() public {
         governance = tx.origin;
@@ -201,6 +205,7 @@ contract Controller {
         //TODO:加个Event 添加新的策略了.
         require(msg.sender == governance, "!governance");
         vaults[_token] = _vault;
+        emit NewVault(_token,_vault);
     }
     
     function setConverter(address _input, address _output, address _converter) public {
