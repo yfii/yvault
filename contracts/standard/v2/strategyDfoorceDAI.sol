@@ -159,9 +159,9 @@ contract StrategyDForceUSDT {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);
-    address constant public d = address(0x868277d475E0e475E38EC5CdA2d9C83B5E1D9fc8);
-    address constant public pool = address(0x324EebDAa45829c6A8eE903aFBc7B61AF48538df);
+    address constant public want = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    address constant public d = address(0x02285AcaafEB533e03A7306C55EC031297df9224);
+    address constant public pool = address(0xD2fA07cD6Cd4A5A96aa86BacfA6E50bB3aaDBA8B);
     address constant public df = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
     address constant public output = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
@@ -170,7 +170,7 @@ contract StrategyDForceUSDT {
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
     
-
+    uint public strategyfee = 0;
     uint public fee = 400;
     uint public burnfee = 500;
     uint public callfee = 100;
@@ -180,6 +180,7 @@ contract StrategyDForceUSDT {
     uint constant public withdrawalMax = 10000;
     
     address public governance;
+    address public strategyDev;
     address public controller;
     address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
 
@@ -200,6 +201,7 @@ contract StrategyDForceUSDT {
         swap2YFIIRouting = [output,weth,yfii];
         swap2TokenRouting = [output,weth,want];
         doApprove();
+        strategyDev = tx.origin;
     }
 
     function doApprove () public{
@@ -299,6 +301,11 @@ contract StrategyDForceUSDT {
         IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //4%  3% team +1% insurance
         IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
         IERC20(yfii).safeTransfer(burnAddress, _burnfee); //burn fee 5%
+
+        if (strategyfee >0){
+            uint _strategyfee = b.mul(strategyfee).div(max);
+            IERC20(yfii).safeTransfer(strategyDev, _strategyfee);
+        }
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
@@ -348,6 +355,10 @@ contract StrategyDForceUSDT {
     function setFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         fee = _fee;
+    }
+    function setStrategyFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        strategyfee = _fee;
     }
     function setCallFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
