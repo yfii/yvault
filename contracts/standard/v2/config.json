@@ -15,7 +15,7 @@
     },
     {
     "token": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-    "Strategy":  "",
+    "Strategy":  "0xbDD4a57c5EE8558370bb661d29a979657D81258e",
     "vault": "0x1e0DC67aEa5aA74718822590294230162B5f2064",
     "name":"dai",
     "StrategyName":"dforce"
