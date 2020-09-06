@@ -12,6 +12,7 @@ interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
     function decimals() external view returns (uint);
+    function name() external view returns (string memory);
     function approve(address spender, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -238,9 +239,6 @@ contract StrategyCurveYCRVVoter {
         IERC20(ydai).safeApprove(curve, uint(-1));
     }
     
-    function getName() external pure returns (string memory) {
-        return "StrategyCurveYCRVVoter";
-    }
     
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
