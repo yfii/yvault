@@ -193,6 +193,7 @@ contract StrategyCurveYCRVVoter {
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
     
+    uint public strategyfee = 0;
     uint public fee = 400;
     uint public burnfee = 500;
     uint public callfee = 100;
@@ -203,6 +204,7 @@ contract StrategyCurveYCRVVoter {
     
     address public governance;
     address public controller;
+    address public strategyDev;
     address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
 
     string public getName;
@@ -223,6 +225,7 @@ contract StrategyCurveYCRVVoter {
         swap2YFIIRouting = [output,weth,yfii];
         swap2TokenRouting = [output,weth,dai];
         doApprove();
+        strategyDev = tx.origin;
         
     }
 
@@ -331,6 +334,11 @@ contract StrategyCurveYCRVVoter {
         IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //4%  3% team +1% insurance
         IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
         IERC20(yfii).safeTransfer(burnAddress, _burnfee); //burn fee 5%
+
+        if (strategyfee >0){
+            uint _strategyfee = b.mul(strategyfee).div(max);
+            IERC20(yfii).safeTransfer(strategyDev, _strategyfee);
+        }
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
@@ -363,6 +371,10 @@ contract StrategyCurveYCRVVoter {
     function setFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         fee = _fee;
+    }
+    function setStrategyFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        strategyfee = _fee;
     }
     function setCallFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
