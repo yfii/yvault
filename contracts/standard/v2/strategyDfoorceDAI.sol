@@ -1,5 +1,5 @@
 /**
- *Submitted for verification at Etherscan.io on 2020-08-28
+ *Submitted for verification at Etherscan.io on 2020-08-13
 */
 
 // SPDX-License-Identifier: MIT
@@ -135,61 +135,37 @@ interface Controller {
  
 */
 
-interface Gauge {
-    function deposit(uint) external;
-    function balanceOf(address) external view returns (uint);
+interface dRewards {
     function withdraw(uint) external;
+    function getReward() external;
+    function stake(uint) external;
+    function balanceOf(address) external view returns (uint);
+    function exit() external;
 }
 
-interface Mintr {
-    function mint(address) external;
+interface dERC20 {
+  function mint(address, uint256) external;
+  function redeem(address, uint) external;
+  function getTokenBalance(address) external view returns (uint);
+  function getExchangeRate() external view returns (uint);
 }
 
 interface UniswapRouter {
     function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
 }
 
-interface yERC20 {
-  function deposit(uint256 _amount) external;
-  function withdraw(uint256 _amount) external;
-}
-
-interface ICurveFi {
-
-  function get_virtual_price() external view returns (uint);
-  function add_liquidity(
-    uint256[4] calldata amounts,
-    uint256 min_mint_amount
-  ) external;
-  function remove_liquidity_imbalance(
-    uint256[4] calldata amounts,
-    uint256 max_burn_amount
-  ) external;
-  function remove_liquidity(
-    uint256 _amount,
-    uint256[4] calldata amounts
-  ) external;
-  function exchange(
-    int128 from, int128 to, uint256 _from_amount, uint256 _min_to_amount
-  ) external;
-}
-
-contract StrategyCurveYCRVVoter {
+contract StrategyDForceUSDT {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
-    address constant public pool = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
-    address constant public mintr = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
-    address constant public crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
-    address constant public output = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
+    address constant public want = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+    address constant public d = address(0x02285AcaafEB533e03A7306C55EC031297df9224);
+    address constant public pool = address(0xD2fA07cD6Cd4A5A96aa86BacfA6E50bB3aaDBA8B);
+    address constant public df = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
+    address constant public output = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for crv <> weth <> dai route
-    
-    address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-    address constant public ydai = address(0x16de59092dAE5CcF4A1E6439D611fd0653f0Bd01);
-    address constant public curve = address(0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51);
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for df <> weth <> usdc route
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
@@ -204,48 +180,49 @@ contract StrategyCurveYCRVVoter {
     uint constant public withdrawalMax = 10000;
     
     address public governance;
-    address public controller;
     address public strategyDev;
+    address public controller;
     address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
 
     string public getName;
 
     address[] public swap2YFIIRouting;
     address[] public swap2TokenRouting;
-
+    
     
     constructor() public {
-        governance = tx.origin;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        governance = msg.sender;
+        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
-                abi.encodePacked(IERC20(want).name(),
-                    abi.encodePacked(":",IERC20(output).name())
+                abi.encodePacked(IERC20(want).name(),"DF Token"
                 )
             ));
         swap2YFIIRouting = [output,weth,yfii];
-        swap2TokenRouting = [output,weth,dai];
+        swap2TokenRouting = [output,weth,want];
         doApprove();
         strategyDev = tx.origin;
-        
     }
 
     function doApprove () public{
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
-        IERC20(dai).safeApprove(ydai, 0);
-        IERC20(dai).safeApprove(ydai, uint(-1));
-        IERC20(ydai).safeApprove(curve, 0);
-        IERC20(ydai).safeApprove(curve, uint(-1));
     }
     
     
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
         if (_want > 0) {
-            IERC20(want).safeApprove(pool, 0);
-            IERC20(want).safeApprove(pool, _want);
-            Gauge(pool).deposit(_want);
+            IERC20(want).safeApprove(d, 0);
+            IERC20(want).safeApprove(d, _want);
+            dERC20(d).mint(address(this), _want);
+        }
+        
+        uint _d = IERC20(d).balanceOf(address(this));
+        if (_d > 0) {
+            IERC20(d).safeApprove(pool, 0);
+            IERC20(d).safeApprove(pool, _d);
+            dRewards(pool).stake(_d);
         }
         
     }
@@ -254,9 +231,7 @@ contract StrategyCurveYCRVVoter {
     function withdraw(IERC20 _asset) external returns (uint balance) {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
-        require(crv != address(_asset), "crv");
-        require(ydai != address(_asset), "ydai");
-        require(dai != address(_asset), "dai");
+        require(d != address(_asset), "d");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -276,9 +251,9 @@ contract StrategyCurveYCRVVoter {
             IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
         }
         
+        
         address _vault = Controller(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
-        
         IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
     }
     
@@ -296,33 +271,27 @@ contract StrategyCurveYCRVVoter {
     }
     
     function _withdrawAll() internal {
-        Gauge(pool).withdraw(Gauge(pool).balanceOf(address(this)));
+        dRewards(pool).exit();
+        uint _d = IERC20(d).balanceOf(address(this));
+        if (_d > 0) {
+            dERC20(d).redeem(address(this),_d);
+        }
     }
     
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
-        Mintr(mintr).mint(pool);
+        dRewards(pool).getReward();
         
         doswap();
-        dosplit();
+        dosplit();//分yfii
         deposit();
-        
     }
+
     function doswap() internal {
         uint256 _2token = IERC20(output).balanceOf(address(this)).mul(90).div(100); //90%
         uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
         UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
         UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
-
-        uint _dai = IERC20(dai).balanceOf(address(this));
-        if (_dai > 0) {
-            yERC20(ydai).deposit(_dai);
-        }
-        uint _ydai = IERC20(ydai).balanceOf(address(this));
-        if (_ydai > 0) {
-            ICurveFi(curve).add_liquidity([_ydai,0,0,0],0);
-        }
-
     }
     function dosplit() internal{
         uint b = IERC20(yfii).balanceOf(address(this));
@@ -340,8 +309,16 @@ contract StrategyCurveYCRVVoter {
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
-        Gauge(pool).withdraw(_amount);
-        return _amount;
+        uint _d = _amount.mul(1e18).div(dERC20(d).getExchangeRate());
+        uint _before = IERC20(d).balanceOf(address(this));
+        dRewards(pool).withdraw(_d);
+        uint _after = IERC20(d).balanceOf(address(this));
+        uint _withdrew = _after.sub(_before);
+        _before = IERC20(want).balanceOf(address(this));
+        dERC20(d).redeem(address(this), _withdrew);
+        _after = IERC20(want).balanceOf(address(this));
+        _withdrew = _after.sub(_before);
+        return _withdrew;
     }
     
     function balanceOfWant() public view returns (uint) {
@@ -349,11 +326,20 @@ contract StrategyCurveYCRVVoter {
     }
     
     function balanceOfPool() public view returns (uint) {
-        return Gauge(pool).balanceOf(address(this));
+        return (dRewards(pool).balanceOf(address(this))).mul(dERC20(d).getExchangeRate()).div(1e18);
+    }
+    
+    function getExchangeRate() public view returns (uint) {
+        return dERC20(d).getExchangeRate();
+    }
+    
+    function balanceOfD() public view returns (uint) {
+        return dERC20(d).getTokenBalance(address(this));
     }
     
     function balanceOf() public view returns (uint) {
         return balanceOfWant()
+               .add(balanceOfD())
                .add(balanceOfPool());
     }
     

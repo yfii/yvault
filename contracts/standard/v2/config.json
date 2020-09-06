@@ -8,9 +8,16 @@
     },
     {
     "token": "0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8",
-    "Strategy":  "",
+    "Strategy":  "0x898828957133d4c50030a5A2D55Ca370915E6A77",
     "vault": "0x3E3db9cc5b540d2794DB3861BE5A4887cF77E48B",
     "name":"ycrv",
     "StrategyName":"crv"
+    },
+    {
+    "token": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "Strategy":  "",
+    "vault": "0x1e0DC67aEa5aA74718822590294230162B5f2064s",
+    "name":"dai",
+    "StrategyName":"dforce"
     }
 ]
