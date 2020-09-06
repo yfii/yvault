@@ -192,7 +192,7 @@ contract StrategyDForceUSDT {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
+        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"DF Token"
