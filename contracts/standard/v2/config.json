@@ -19,5 +19,12 @@
     "vault": "0x1e0DC67aEa5aA74718822590294230162B5f2064",
     "name":"dai",
     "StrategyName":"dforce"
+    },
+    {
+    "token": "0x0000000000085d4780B73119b644AE5ecd22b376",
+    "Strategy":  "0x30aE128ebCdec11F62cB3fa9C6a0E8269a9AF686",
+    "vault": "0x4243f5C8683089b65a9F588B1AE578d5D84bFBC9",
+    "name":"tusd",
+    "StrategyName":"crv"
     }
 ]
