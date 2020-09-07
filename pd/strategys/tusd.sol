@@ -168,7 +168,7 @@ contract StrategyTUSDCurve {
     address constant public want = address(0x0000000000085d4780B73119b644AE5ecd22b376);
     address constant public y = address(0x73a052500105205d34Daf004eAb301916DA8190f);
     address constant public ycrv = address(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
-    address constant public yycrv = address(0x5dbcF33D8c2E976c6b560249878e6F1491Bca25c);
+    address constant public iycrv = address(0x3E3db9cc5b540d2794DB3861BE5A4887cF77E48B);
     address constant public curve = address(0x45F783CCE6B7FF23B2ab2D70e416cdb7D6055f51);
     
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
@@ -211,9 +211,9 @@ contract StrategyTUSDCurve {
         }
         uint _ycrv = IERC20(ycrv).balanceOf(address(this));
         if (_ycrv > 0) {
-            IERC20(ycrv).safeApprove(yycrv, 0);
-            IERC20(ycrv).safeApprove(yycrv, _ycrv);
-            yERC20(yycrv).deposit(_ycrv);
+            IERC20(ycrv).safeApprove(iycrv, 0);
+            IERC20(ycrv).safeApprove(iycrv, _ycrv);
+            yERC20(iycrv).deposit(_ycrv);
         }
     }
     
@@ -223,7 +223,7 @@ contract StrategyTUSDCurve {
         require(want != address(_asset), "want");
         require(y != address(_asset), "y");
         require(ycrv != address(_asset), "ycrv");
-        require(yycrv != address(_asset), "yycrv");
+        require(iycrv != address(_asset), "iycrv");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -288,9 +288,9 @@ contract StrategyTUSDCurve {
     }
     
     function _withdrawAll() internal {
-        uint _yycrv = IERC20(yycrv).balanceOf(address(this));
+        uint _yycrv = IERC20(iycrv).balanceOf(address(this));
         if (_yycrv > 0) {
-            yERC20(yycrv).withdraw(_yycrv);
+            yERC20(iycrv).withdraw(_yycrv);
             withdrawTUSD(IERC20(ycrv).balanceOf(address(this)));
         }
     }
@@ -298,10 +298,10 @@ contract StrategyTUSDCurve {
     function _withdrawSome(uint256 _amount) internal returns (uint) {
         // calculate amount of ycrv to withdraw for amount of _want_
         uint _ycrv = _amount.mul(1e18).div(ICurveFi(curve).get_virtual_price());
-        // calculate amount of yycrv to withdraw for amount of _ycrv_
-        uint _yycrv = _ycrv.mul(1e18).div(yERC20(yycrv).getPricePerFullShare());
+        // calculate amount of iycrv to withdraw for amount of _ycrv_
+        uint _yycrv = _ycrv.mul(1e18).div(yERC20(iycrv).getPricePerFullShare());
         uint _before = IERC20(ycrv).balanceOf(address(this));
-        yERC20(yycrv).withdraw(_yycrv);
+        yERC20(iycrv).withdraw(_yycrv);
         uint _after = IERC20(ycrv).balanceOf(address(this));
         return withdrawTUSD(_after.sub(_before));
     }
@@ -311,11 +311,11 @@ contract StrategyTUSDCurve {
     }
     
     function balanceOfYYCRV() public view returns (uint) {
-        return IERC20(yycrv).balanceOf(address(this));
+        return IERC20(iycrv).balanceOf(address(this));
     }
     
     function balanceOfYYCRVinYCRV() public view returns (uint) {
-        return balanceOfYYCRV().mul(yERC20(yycrv).getPricePerFullShare()).div(1e18);
+        return balanceOfYYCRV().mul(yERC20(iycrv).getPricePerFullShare()).div(1e18);
     }
     
     function balanceOfYYCRVinyTUSD() public view returns (uint) {
