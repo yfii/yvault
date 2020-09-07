@@ -183,17 +183,17 @@ contract StrategyTUSDCurve {
     address constant public tusd = address(0x0000000000085d4780B73119b644AE5ecd22b376);
     address constant public ytusd = address(0x73a052500105205d34Daf004eAb301916DA8190f);
 
-    
+
     address public governance;
     address public controller;
     
-    constructor(address _controller) public {
-        governance = msg.sender;
-        controller = _controller;
+    constructor() public {
+        governance = tx.origin;
+        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
     }
-    
+
     function getName() external pure returns (string memory) {
-        return "StrategyTUSDCurve";
+        return "yfii:StrategyTUSD:Curve";
     }
     
     function deposit() public {
