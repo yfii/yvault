@@ -163,6 +163,9 @@ interface IBankController {
         view
         returns (address);
 }
+interface ForReward{
+    function claimReward() external;
+}
 
 contract StrategyFortube {
     using SafeERC20 for IERC20;
@@ -178,6 +181,7 @@ contract StrategyFortube {
 
 
     address constant public fortube = address(0xdE7B3b2Fe0E7b4925107615A5b199a4EB40D9ca9);//主合约.
+    address constant public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
 
     
     uint public strategyfee = 100;
@@ -282,7 +286,7 @@ contract StrategyFortube {
     
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
-        //TODO: get rewards
+        ForReward(fortube_reward).claimReward();
         doswap();
         dosplit();//分yfii
         deposit();
