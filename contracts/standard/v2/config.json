@@ -29,7 +29,7 @@
     },
     {
     "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "Strategy":  "0xc41f2d937503A27C7502617A8cA1Bdb228752Ca7",
+    "Strategy":  "0x17D5C3FFe2A7c7a1E4567c7501d166B0532C8826",
     "vault": "0x23B4dB3a435517fd5f2661a9c5a16f78311201c1",
     "name":"usdc",
     "StrategyName":"for"
