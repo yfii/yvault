@@ -280,7 +280,7 @@ contract StrategyFortube {
     function _withdrawAll() internal {
         address _controller = For(fortube).controller();
         IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
-        uint b = fToken.balanceOf(msg.sender);
+        uint b = fToken.balanceOf(address(this));
         For(fortube).withdraw(want,b);
     }
     
