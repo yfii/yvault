@@ -26,5 +26,12 @@
     "vault": "0x4243f5C8683089b65a9F588B1AE578d5D84bFBC9",
     "name":"tusd",
     "StrategyName":"crv"
+    },
+    {
+    "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "Strategy":  "0xc41f2d937503A27C7502617A8cA1Bdb228752Ca7",
+    "vault": "0x23B4dB3a435517fd5f2661a9c5a16f78311201c1",
+    "name":"usdc",
+    "StrategyName":"for"
     }
 ]
