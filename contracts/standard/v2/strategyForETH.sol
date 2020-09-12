@@ -167,12 +167,20 @@ interface ForReward{
     function claimReward() external;
 }
 
+interface WETH {
+    function deposit() external payable;
+    function withdraw(uint wad) external;
+    event Deposit(address indexed dst, uint wad);
+    event Withdrawal(address indexed src, uint wad);
+}
+
 contract StrategyFortube {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); //usdc
+    address constant public eth_address = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+    address constant public want = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); //eth
     address constant public output = address(0x1FCdcE58959f536621d76f5b7FfB955baa5A672F); //for
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for for <> weth <> usdc route
@@ -206,14 +214,14 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
                 )
             ));
         swap2YFIIRouting = [output,weth,yfii];
-        swap2TokenRouting = [output,weth,want];
+        swap2TokenRouting = [output,weth];//for->weth
         doApprove();
         strategyDev = tx.origin;
     }
@@ -222,15 +230,18 @@ contract StrategyFortube {
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
     }
-    
+
+
+        
+    function () external payable {
+    }
     
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
         address _controller = For(fortube).controller();
         if (_want > 0) {
-            IERC20(want).safeApprove(_controller, 0);
-            IERC20(want).safeApprove(_controller, _want);
-            For(fortube).deposit(want,_want);
+            WETH(address(weth)).withdraw(_want); //weth->eth
+            For(fortube).deposit.value(_want)(eth_address,_want);
         }
         
     }
@@ -279,9 +290,9 @@ contract StrategyFortube {
     
     function _withdrawAll() internal {
         address _controller = For(fortube).controller();
-        IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
-        uint b = fToken.balanceOf(address(this));
-        For(fortube).withdraw(want,b);
+        IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(eth_address));
+        uint b = fToken.calcBalanceOfUnderlying(address(this));
+        _withdrawSome(b);
     }
     
     function harvest() public {
@@ -314,7 +325,8 @@ contract StrategyFortube {
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
-        For(fortube).withdrawUnderlying(want,_amount);
+        For(fortube).withdrawUnderlying(eth_address,_amount);
+        WETH(address(weth)).deposit.value(address(this).balance)();
         return _amount;
     }
     
@@ -324,7 +336,7 @@ contract StrategyFortube {
     
     function balanceOfPool() public view returns (uint) {
         address _controller = For(fortube).controller();
-        IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
+        IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(eth_address));
         return fToken.calcBalanceOfUnderlying(address(this));
     }
     
