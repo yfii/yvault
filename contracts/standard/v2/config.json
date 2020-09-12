@@ -33,5 +33,12 @@
     "vault": "0x23B4dB3a435517fd5f2661a9c5a16f78311201c1",
     "name":"usdc",
     "StrategyName":"for"
+    },
+    {
+    "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "Strategy":  "0x0c3E69eF29cbD32e0732409B748ef317a5F4f0a5",
+    "vault": "0xa8EA49a9e242fFfBdECc4583551c3BcB111456E6",
+    "name":"eth",
+    "StrategyName":"for"
     }
 ]
