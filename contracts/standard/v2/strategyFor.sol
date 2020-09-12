@@ -266,7 +266,7 @@ contract StrategyFortube {
     
     // Withdraw all funds, normally used when migrating strategies
     function withdrawAll() external returns (uint balance) {
-        require(msg.sender == controller, "!controller");
+        require(msg.sender == controller || msg.sender == governance,"!governance");
         _withdrawAll();
         
         
