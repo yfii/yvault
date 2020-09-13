@@ -172,7 +172,7 @@ contract StrategyFortube {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); //usdc
+    address constant public want = address(0xdAC17F958D2ee523a2206206994597C13D831ec7); //usdc
     address constant public output = address(0x1FCdcE58959f536621d76f5b7FfB955baa5A672F); //for
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for for <> weth <> usdc route
@@ -206,7 +206,7 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
