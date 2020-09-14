@@ -1,7 +1,10 @@
+// controller: 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f
+
 [
     {
     "token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    "Strategy":  "0xe2df4c46acabb1cdb446351d6b24727944a5bfcc",
+    "Strategy":  "0xe2df4c46acabb1cdb446351d6b24727944a5bfcc", //df
+    "Strategy1":  "", //for
     "vault": "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
     "name":"usdt",
     "StrategyName":"dforce"
@@ -35,10 +38,10 @@
     "StrategyName":"for"
     },
     {
-    "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-    "Strategy":  "0x0c3E69eF29cbD32e0732409B748ef317a5F4f0a5",
-    "vault": "0xa8EA49a9e242fFfBdECc4583551c3BcB111456E6",
-    "name":"eth",
-    "StrategyName":"for"
+        "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "Strategy": "0x0c3E69eF29cbD32e0732409B748ef317a5F4f0a5",
+        "vault": "0xa8EA49a9e242fFfBdECc4583551c3BcB111456E6",
+        "name": "eth",
+        "StrategyName": "for"
     }
 ]
