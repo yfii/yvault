@@ -179,17 +179,17 @@ contract StrategyFortube {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public eth_address = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    address constant public want = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); //eth
-    address constant public output = address(0x1FCdcE58959f536621d76f5b7FfB955baa5A672F); //for
-    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for for <> weth <> usdc route
+    address constant public eth_address = address(0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB);
+    address constant public want = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); //usdc
+    address constant public output = address(0x658A109C5900BC6d2357c87549B651670E5b0539); //for
+    address constant public unirouter = address();
+    address constant public weth = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // used for for <> weth <> usdc route
 
-    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+    address constant public yfii = address(0x7F70642d88cf1C4a3a7abb072B53B929b653edA5);
 
 
-    address constant public fortube = address(0xdE7B3b2Fe0E7b4925107615A5b199a4EB40D9ca9);//主合约.
-    address constant public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
+    address constant public fortube = address(0x0cEA0832e9cdBb5D476040D58Ea07ecfbeBB7672);//主合约.
+    address  public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
 
     
     uint public strategyfee = 100;
@@ -214,7 +214,7 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
+        controller = 0xb313b02235Acb925D51Be22bAf90Dc68B4Bf8Af5;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
@@ -231,6 +231,10 @@ contract StrategyFortube {
         IERC20(output).safeApprove(unirouter, uint(-1));
     }
 
+    function setFortubeReward(address _reward) public {
+        require(msg.sender == governance, "!governance");
+        fortube_reward = _reward;
+    }
 
         
     function () external payable {
