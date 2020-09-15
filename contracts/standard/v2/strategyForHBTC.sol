@@ -228,7 +228,7 @@ contract StrategyFortube {
         uint _want = IERC20(want).balanceOf(address(this));
         address _controller = For(fortube).controller();
         if (_want > 0) {
-            IERC20(want).safeApprove(_controller, 0);
+            // IERC20(want).safeApprove(_controller, 0);
             IERC20(want).safeApprove(_controller, _want);
             For(fortube).deposit(want,_want);
         }
