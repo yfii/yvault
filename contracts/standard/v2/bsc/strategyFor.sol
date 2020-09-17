@@ -172,7 +172,6 @@ contract StrategyFortube {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(); //usdc
     address constant public output = address(0x658A109C5900BC6d2357c87549B651670E5b0539); //for
     address constant public unirouter = address(0x75Ca8F6c82df5FdFd09049f46AD5d072b0a53BF6);
     address constant public weth = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // used for for <> weth <> usdc route
@@ -182,6 +181,8 @@ contract StrategyFortube {
 
     address constant public fortube = address(0x0cEA0832e9cdBb5D476040D58Ea07ecfbeBB7672);//主合约.
     address  public fortube_reward = address(0x55838F18e79cFd3EA22Eea08Bd3Ec18d67f314ed); //领取奖励的合约
+    
+    address  public want; 
 
     
     uint public strategyfee = 100;
@@ -204,7 +205,8 @@ contract StrategyFortube {
     address[] public swap2TokenRouting;
     
     
-    constructor() public {
+    constructor(address _want) public {
+        want = _want;
         governance = msg.sender;
         controller = 0xb313b02235Acb925D51Be22bAf90Dc68B4Bf8Af5;
         getName = string(
