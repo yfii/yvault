@@ -208,7 +208,7 @@ contract StrategyFortube {
     constructor(address _want) public {
         want = _want;
         governance = msg.sender;
-        controller = 0xb313b02235Acb925D51Be22bAf90Dc68B4Bf8Af5;
+        controller = 0x5B916D02A9745C64EC6C0AFe41Ee4893Dd5a01B7;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
