@@ -10,7 +10,7 @@
     },
     {
     "token": "0xe9e7cea3dedca5984780bafc599bd69add087d56",
-    "Strategy":  "",
+    "Strategy":  "0x64E1f640A756578b8C6FaDae864824fB90B95491",
     "vault": "0xeB3C085FBc1030bb127114CB1A3B9A02A24eF62d",
     "name":"busd",
     "StrategyName":""
