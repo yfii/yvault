@@ -3,14 +3,14 @@
 [
     {
     "token": "0x55d398326f99059ff775485246999027b3197955",
-    "Strategy":  "0xdE627a1C5091b1b31C417FeAc919C3b9F4D61f14",
+    "Strategy":  "0x92f5ff3f1b4d8aD81Ba1765a2F1af612205119c2",
     "vault": "0x1F19D041FDCE1B70901008229d77A8B02E315618",
     "name":"usdt",
     "StrategyName":""
     },
     {
     "token": "0xe9e7cea3dedca5984780bafc599bd69add087d56",
-    "Strategy":  "0x64E1f640A756578b8C6FaDae864824fB90B95491",
+    "Strategy":  "0x5d6d4d666f522723C993279D107833B22d40A193",
     "vault": "0xeB3C085FBc1030bb127114CB1A3B9A02A24eF62d",
     "name":"busd",
     "StrategyName":""
