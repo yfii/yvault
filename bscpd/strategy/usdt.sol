@@ -1,4 +1,8 @@
 /**
+ *Submitted for verification at Bscscan.com on 2020-09-17
+*/
+
+/**
  *Submitted for verification at Etherscan.io on 2020-08-13
 */
 
@@ -208,7 +212,7 @@ contract StrategyFortube {
     constructor(address _want) public {
         want = _want;
         governance = msg.sender;
-        controller = 0x5B916D02A9745C64EC6C0AFe41Ee4893Dd5a01B7;
+        controller = 0xb313b02235Acb925D51Be22bAf90Dc68B4Bf8Af5;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
