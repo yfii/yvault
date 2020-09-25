@@ -561,7 +561,7 @@ contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public lp = IERC20(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+    IERC20 public lp = IERC20(0xc4b478E749dbCFDdF96C6f84f4133E2f03c345a9);
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -590,9 +590,9 @@ contract LPTokenWrapper {
 
 contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
 
-    IERC20 public iUSDT = IERC20(0x72Cf258c852Dc485a853370171d46B9D29fD3184);
+    IERC20 public MEFI = IERC20(0x1a969239E12F07281f8876D11AfceE081D872adf);
 
-    uint256 public constant DURATION = 7 days;
+    uint256 public constant DURATION = 14 days;
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
@@ -659,7 +659,7 @@ contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            iUSDT.safeTransfer(msg.sender, reward);
+            MEFI.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
