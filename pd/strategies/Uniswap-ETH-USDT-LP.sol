@@ -23,6 +23,7 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+
 library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
@@ -143,9 +144,26 @@ interface UniswapRouter {
     function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
 }
 
-interface yERC20 {
-  function deposit(uint256 _amount) external;
-  function withdraw(uint256 _amount) external;
+// https://etherscan.io/tx/0xe5130f9182ab0ee26ba6600b08a6b66b160867ccedfeb4b3aff1bd6f84da1c24
+interface IUniHelper {
+    function swapAndAddLiquidityTokenAndToken(
+        address tokenAddressA,
+        address tokenAddressB,
+        uint112 amountA,
+        uint112 amountB,
+        uint112 minLiquidityOut,
+        address to,
+        uint64 deadline
+    ) external returns(uint liquidity);
+}
+
+// 
+interface IStakingRewards {
+    function balanceOf(address account) external view returns (uint256);
+    // Mutative
+    function stake(uint256 amount) external;
+    function withdraw(uint256 amount) external;
+    function getReward() external;
 }
 
 contract StrategyUniswap_ETH_USDT_LP {
@@ -153,11 +171,18 @@ contract StrategyUniswap_ETH_USDT_LP {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852);
+    address constant public want = address(0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852); // LP
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-    
-    uint public strategyfee = 0;
+    address constant public output = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984); // UNI   
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+    address constant public usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);    
+    address constant public miner = address(0x6C3e4cb2E96B01F4b866965A91ed4437839A121a); // Uniswap V2: ETH/USDT UNI Pool    
+    address constant public unihelper = address(0xe5130f9182ab0ee26ba6600b08a6b66b160867ccedfeb4b3aff1bd6f84da1c24); 
+
+
+
+    uint public strategyfee = 100;
     uint public fee = 400;
     uint public burnfee = 500;
     uint public callfee = 100;
@@ -186,8 +211,8 @@ contract StrategyUniswap_ETH_USDT_LP {
                     abi.encodePacked(":",IERC20(output).name())
                 )
             ));
-        swap2YFIIRouting = [output,weth,yfii];
-        swap2TokenRouting = [output,weth,dai];
+        swap2TokenRouting = [output,weth];
+        swap2YFIIRouting = [weth,yfii];
         doApprove();
         strategyDev = tx.origin;
         
@@ -196,30 +221,26 @@ contract StrategyUniswap_ETH_USDT_LP {
     function doApprove () public{
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
-        IERC20(dai).safeApprove(ydai, 0);
-        IERC20(dai).safeApprove(ydai, uint(-1));
-        IERC20(ydai).safeApprove(curve, 0);
-        IERC20(ydai).safeApprove(curve, uint(-1));
+        IERC20(weth).safeApprove(unirouter, 0);
+        IERC20(weth).safeApprove(unirouter, uint(-1));   
+        IERC20(want).safeApprove(miner, 0);
+        IERC20(want).safeApprove(miner, uint(-1));
     }
-    
-    
+        
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
         if (_want > 0) {
-            IERC20(want).safeApprove(pool, 0);
-            IERC20(want).safeApprove(pool, _want);
-            Gauge(pool).deposit(_want);
-        }
-        
+            IStakingRewards(miner).stake(_want);            
+        }        
     }
     
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint balance) {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
-        require(crv != address(_asset), "crv");
-        require(ydai != address(_asset), "ydai");
-        require(dai != address(_asset), "dai");
+        require(output != address(_asset), "uni");
+        require(weth != address(_asset), "weth");
+        require(usdt != address(_asset), "usdt");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -259,12 +280,12 @@ contract StrategyUniswap_ETH_USDT_LP {
     }
     
     function _withdrawAll() internal {
-        Gauge(pool).withdraw(Gauge(pool).balanceOf(address(this)));
+        IStakingRewards(miner).withdraw(balanceOfPool());        
     }
     
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
-        Mintr(mintr).mint(pool);
+        IStakingRewards(miner).getReward();
         
         doswap();
         dosplit();
@@ -272,20 +293,14 @@ contract StrategyUniswap_ETH_USDT_LP {
         
     }
     function doswap() internal {
-        uint256 _2token = IERC20(output).balanceOf(address(this)).mul(90).div(100); //90%
-        uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
-        UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
+        uint256 _2weth = IERC20(output).balanceOf(address(this)); 
+        // Uni -> WETH
+        UniswapRouter(unirouter).swapExactTokensForTokens(_2weth, 0, swap2TokenRouting, address(this), now.add(1800));
+        // WETH -> YFII 10%
+        uint256 _2yfii = IERC20(weth).balanceOf(address(this)).mul(10).div(100);
         UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
-
-        uint _dai = IERC20(dai).balanceOf(address(this));
-        if (_dai > 0) {
-            yERC20(ydai).deposit(_dai);
-        }
-        uint _ydai = IERC20(ydai).balanceOf(address(this));
-        if (_ydai > 0) {
-            ICurveFi(curve).add_liquidity([_ydai,0,0,0],0);
-        }
-
+        // WETH -> LP
+        IUniHelper(unihelper).swapAndAddLiquidityTokenAndToken(weth,usdt,uint112(IERC20(weth).balanceOf(address(this))),uint112(IERC20(usdt).balanceOf(address(this))),0,address(this),uint64(now.add(1800)));            
     }
     function dosplit() internal{
         uint b = IERC20(yfii).balanceOf(address(this));
@@ -303,7 +318,7 @@ contract StrategyUniswap_ETH_USDT_LP {
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
-        Gauge(pool).withdraw(_amount);
+        IStakingRewards(miner).withdraw(_amount);        
         return _amount;
     }
     
@@ -312,7 +327,7 @@ contract StrategyUniswap_ETH_USDT_LP {
     }
     
     function balanceOfPool() public view returns (uint) {
-        return Gauge(pool).balanceOf(address(this));
+        return IStakingRewards(miner).balanceOf(address(this));
     }
     
     function balanceOf() public view returns (uint) {
