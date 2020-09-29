@@ -219,15 +219,22 @@ contract StrategyUniswap_ETH_USDT_LP {
     }
 
     function doApprove () public{
+        //卖uni
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
+
+        // 卖weth 到yfii
         IERC20(weth).safeApprove(unirouter, 0);
-        IERC20(weth).safeApprove(unirouter, uint(-1));   
+        IERC20(weth).safeApprove(unirouter, uint(-1)); 
+
+        // lp存到挖矿合约  
         IERC20(want).safeApprove(miner, 0);
         IERC20(want).safeApprove(miner, uint(-1));  
 
+        // weth 换 lp
         IERC20(weth).safeApprove(unihelper, 0);
-        IERC20(weth).safeApprove(unihelper, uint(-1));        
+        IERC20(weth).safeApprove(unihelper, uint(-1)); 
+        // usdt 换 lp       
         IERC20(usdt).safeApprove(unihelper, 0);
         IERC20(usdt).safeApprove(unihelper, uint(-1));
     }
