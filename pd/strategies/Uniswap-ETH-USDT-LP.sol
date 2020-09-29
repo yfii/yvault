@@ -178,12 +178,12 @@ contract StrategyUniswap_ETH_USDT_LP {
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);    
     address constant public miner = address(0x6C3e4cb2E96B01F4b866965A91ed4437839A121a); // Uniswap V2: ETH/USDT UNI Pool    
-    address constant public unihelper = address(0xe5130f9182ab0ee26ba6600b08a6b66b160867ccedfeb4b3aff1bd6f84da1c24); 
+    address constant public unihelper = address(0xF261b678F3aC1EeCaB206825341a10ceb591C589);  //TODO:是否要自己创建一个?
 
 
 
     uint public strategyfee = 100;
-    uint public fee = 400;
+    uint public fee = 300;
     uint public burnfee = 500;
     uint public callfee = 100;
     uint constant public max = 1000;
@@ -214,7 +214,7 @@ contract StrategyUniswap_ETH_USDT_LP {
         swap2TokenRouting = [output,weth];
         swap2YFIIRouting = [weth,yfii];
         doApprove();
-        strategyDev = tx.origin;
+        strategyDev = tx.origin; //TODO:换成 策略提供者的地址
         
     }
 
@@ -224,7 +224,12 @@ contract StrategyUniswap_ETH_USDT_LP {
         IERC20(weth).safeApprove(unirouter, 0);
         IERC20(weth).safeApprove(unirouter, uint(-1));   
         IERC20(want).safeApprove(miner, 0);
-        IERC20(want).safeApprove(miner, uint(-1));
+        IERC20(want).safeApprove(miner, uint(-1));  
+
+        IERC20(weth).safeApprove(unihelper, 0);
+        IERC20(weth).safeApprove(unihelper, uint(-1));        
+        IERC20(usdt).safeApprove(unihelper, 0);
+        IERC20(usdt).safeApprove(unihelper, uint(-1));
     }
         
     function deposit() public {
