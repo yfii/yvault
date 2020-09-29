@@ -287,6 +287,25 @@ interface IUniswapV2Pair {
     function token1() external view returns (address);
 }
 
+interface UniswapRouter {
+    function removeLiquidity(
+        address tokenA,
+        address tokenB,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline
+        ) external returns (uint amountA, uint amountB);
+    function swapExactTokensForTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+        ) external returns (uint[] memory amounts);
+}
+
 contract iLPVault is ERC20, ERC20Detailed {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -295,6 +314,7 @@ contract iLPVault is ERC20, ERC20Detailed {
     IERC20 public token;
     
     address constant public unihelper = address(0xF261b678F3aC1EeCaB206825341a10ceb591C589);  //TODO:是否要自己创建一个?
+    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
     uint public min = 9900;
     uint public constant max = 10000;
@@ -323,10 +343,21 @@ contract iLPVault is ERC20, ERC20Detailed {
     }
 
     function doApprove () public{
+        //移除流动性需要用到
+        token.safeApprove(unirouter, 0);
+        token.safeApprove(unirouter, uint(-1));
+
+        //单币换成 lp需要用到
         IERC20(token0).safeApprove(unihelper, 0);
         IERC20(token0).safeApprove(unihelper, uint(-1));        
         IERC20(token1).safeApprove(unihelper, 0);
         IERC20(token1).safeApprove(unihelper, uint(-1));
+
+        //单币换成 另一个单币需要用到
+        IERC20(token0).safeApprove(unirouter, 0);
+        IERC20(token0).safeApprove(unirouter, uint(-1));        
+        IERC20(token1).safeApprove(unirouter, 0);
+        IERC20(token1).safeApprove(unirouter, uint(-1));
     }
     
     function balance() public view returns (uint) {
@@ -459,6 +490,77 @@ contract iLPVault is ERC20, ERC20Detailed {
         }
         
         token.safeTransfer(msg.sender, r);
+    }
+
+    function withdrawToken0All() external {
+        withdrawToken0(balanceOf(msg.sender));
+    }
+    function withdrawToken0(uint _shares) public {
+        uint r = (balance().mul(_shares)).div(totalSupply());
+        _burn(msg.sender, _shares);
+        
+        // Check balance
+        uint b = token.balanceOf(address(this));
+        if (b < r) {
+            uint _withdraw = r.sub(b);
+            Controller(controller).withdraw(address(token), _withdraw);
+            uint _after = token.balanceOf(address(this));
+            uint _diff = _after.sub(b);
+            if (_diff < _withdraw) {
+                r = b.add(_diff);
+            }
+        }
+
+        uint _before =  IERC20(token0).balanceOf(address(this));
+
+        //移除流动性
+        (uint amountA, uint amountB) = UniswapRouter(unirouter).removeLiquidity(token0,token1,r,0,0,address(this),now.add(1800));
+        //token1 -> token0
+        address[] memory path3 = new address[](2);
+            path3[0] = token1;
+            path3[1] = token0;
+        UniswapRouter(unirouter).swapExactTokensForTokens(amountB, 0, path3, address(this), now.add(1800));
+
+        uint _after =  IERC20(token0).balanceOf(address(this));
+        uint _amount = _after.sub(_before);
+        
+        IERC20(token0).safeTransfer(msg.sender, _amount);
+
+    }
+    function withdrawToken1All() external {
+        withdrawToken1(balanceOf(msg.sender));
+    }
+    function withdrawToken1(uint _shares) public {
+        uint r = (balance().mul(_shares)).div(totalSupply());
+        _burn(msg.sender, _shares);
+        
+        // Check balance
+        uint b = token.balanceOf(address(this));
+        if (b < r) {
+            uint _withdraw = r.sub(b);
+            Controller(controller).withdraw(address(token), _withdraw);
+            uint _after = token.balanceOf(address(this));
+            uint _diff = _after.sub(b);
+            if (_diff < _withdraw) {
+                r = b.add(_diff);
+            }
+        }
+
+        uint _before =  IERC20(token1).balanceOf(address(this));
+
+        //移除流动性
+        (uint amountA, uint amountB) = UniswapRouter(unirouter).removeLiquidity(token0,token1,r,0,0,address(this),now.add(1800));
+        //token0 -> token1
+        address[] memory path3 = new address[](2);
+            path3[0] = token0;
+            path3[1] = token1;
+        UniswapRouter(unirouter).swapExactTokensForTokens(amountA, 0, path3, address(this), now.add(1800));
+
+        uint _after =  IERC20(token1).balanceOf(address(this));
+        uint _amount = _after.sub(_before);
+        
+        IERC20(token1).safeTransfer(msg.sender, _amount);
+
     }
     
     function getPricePerFullShare() public view returns (uint) {
