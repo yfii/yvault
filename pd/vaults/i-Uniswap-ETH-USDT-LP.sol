@@ -271,21 +271,42 @@ interface Controller {
     function balanceOf(address) external view returns (uint);
     function earn(address, uint) external;
 }
+interface IUniHelper {
+    function swapAndAddLiquidityTokenAndToken(
+        address tokenAddressA,
+        address tokenAddressB,
+        uint112 amountA,
+        uint112 amountB,
+        uint112 minLiquidityOut,
+        address to,
+        uint64 deadline
+    ) external returns(uint liquidity);
+}
+interface IUniswapV2Pair {
+    function token0() external view returns (address);
+    function token1() external view returns (address);
+}
 
-contract iVault is ERC20, ERC20Detailed {
+contract iLPVault is ERC20, ERC20Detailed {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
     IERC20 public token;
     
-    uint public min = 9500;
+    address constant public unihelper = address(0xF261b678F3aC1EeCaB206825341a10ceb591C589);  //TODO:是否要自己创建一个?
+
+    uint public min = 9900;
     uint public constant max = 10000;
     uint public earnLowerlimit; //池内空余资金到这个值就自动earn
     
     address public governance;
     address public controller;
+
+    address public token0;
+    address public token1;
     
+    //_token : lp token
     constructor (address _token,uint _earnLowerlimit) public ERC20Detailed(
         string(abi.encodePacked("yfii ", ERC20Detailed(_token).name())),
         string(abi.encodePacked("i", ERC20Detailed(_token).symbol())),
@@ -295,6 +316,17 @@ contract iVault is ERC20, ERC20Detailed {
         governance = tx.origin;
         controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
         earnLowerlimit = _earnLowerlimit;
+        token0 = IUniswapV2Pair(_token).token0();
+        token1 = IUniswapV2Pair(_token).token1();
+        require(token0!=address(0) && token1!=address(0),"error");
+        doApprove();
+    }
+
+    function doApprove () public{
+        IERC20(token0).safeApprove(unihelper, 0);
+        IERC20(token0).safeApprove(unihelper, uint(-1));        
+        IERC20(token1).safeApprove(unihelper, 0);
+        IERC20(token1).safeApprove(unihelper, uint(-1));
     }
     
     function balance() public view returns (uint) {
@@ -350,7 +382,55 @@ contract iVault is ERC20, ERC20Detailed {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
         _mint(msg.sender, shares);
-        if (token.balanceOf(address(this))>earnLowerlimit){
+        if (available()>earnLowerlimit){
+          earn();
+        }
+    }    
+    
+    function depositToken0All() external {
+        depositToken0(IERC20(token0).balanceOf(msg.sender));
+    }
+    function depositToken0(uint _amount) public {
+        uint _pool = balance();
+        uint _before = token.balanceOf(address(this));
+
+        IERC20(token0).safeTransferFrom(msg.sender, address(this), _amount);
+        IUniHelper(unihelper).swapAndAddLiquidityTokenAndToken(token0,token1,uint112(_amount),0,0,address(this),uint64(now.add(1800)));            
+
+        uint _after = token.balanceOf(address(this));
+        _amount = _after.sub(_before); // Additional check for deflationary tokens
+        uint shares = 0;
+        if (totalSupply() == 0) {
+            shares = _amount;
+        } else {
+            shares = (_amount.mul(totalSupply())).div(_pool);
+        }
+        _mint(msg.sender, shares);
+        if (available()>earnLowerlimit){
+          earn();
+        }
+    }
+    
+    function depositToken1All() external {
+        depositToken1(IERC20(token1).balanceOf(msg.sender));
+    }
+    function depositToken1(uint _amount) public {
+        uint _pool = balance();
+        uint _before = token.balanceOf(address(this));
+
+        IERC20(token1).safeTransferFrom(msg.sender, address(this), _amount);
+        IUniHelper(unihelper).swapAndAddLiquidityTokenAndToken(token0,token1,0,uint112(_amount),0,address(this),uint64(now.add(1800)));            
+
+        uint _after = token.balanceOf(address(this));
+        _amount = _after.sub(_before); // Additional check for deflationary tokens
+        uint shares = 0;
+        if (totalSupply() == 0) {
+            shares = _amount;
+        } else {
+            shares = (_amount.mul(totalSupply())).div(_pool);
+        }
+        _mint(msg.sender, shares);
+        if (available()>earnLowerlimit){
           earn();
         }
     }
