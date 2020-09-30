@@ -313,7 +313,7 @@ contract iLPVault is ERC20, ERC20Detailed {
     
     IERC20 public token;
     
-    address constant public unihelper = address(0x2c9De6d321597D12DA8c5DB39E79040A3Cf4Fcb4);  
+    address constant public unihelper = address(0x3AF045FD63Afc040aE9FD8C5b380d2DF2B804cfc);  
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
 
     uint public min = 9900;
