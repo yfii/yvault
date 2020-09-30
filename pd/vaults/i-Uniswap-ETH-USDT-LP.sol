@@ -281,6 +281,13 @@ interface IUniHelper {
         address to,
         uint64 deadline
     ) external returns(uint liquidity);
+    function swapAndAddLiquidityEthAndToken(
+        address tokenAddressB,
+        uint112 amountB,
+        uint112 minLiquidityOut,
+        address to,
+        uint64 deadline
+    ) public payable returns(uint liquidity)
 }
 interface IUniswapV2Pair {
     function token0() external view returns (address);
@@ -315,6 +322,8 @@ contract iLPVault is ERC20, ERC20Detailed {
     
     address constant public unihelper = address(0x3AF045FD63Afc040aE9FD8C5b380d2DF2B804cfc);  
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
+
 
     uint public min = 9900;
     uint public constant max = 10000;
@@ -389,7 +398,6 @@ contract iLPVault is ERC20, ERC20Detailed {
     function available() public view returns (uint) {
         return token.balanceOf(address(this)).mul(min).div(max);
     }
-    //TODO:支持eth 入金
     
     function earn() public {
         uint _bal = available();
@@ -418,7 +426,32 @@ contract iLPVault is ERC20, ERC20Detailed {
           earn();
         }
     }    
-    
+    function depostETH() payable external{
+        uint _pool = balance();
+        uint _before = token.balanceOf(address(this));
+
+        address _tokenB = token0;
+        if (token0 == weth){
+            _tokenB = token1;
+        }
+
+        IUniHelper(unihelper).swapAndAddLiquidityEthAndToken.value(msg.value)(_tokenB,0,0,address(this),uint64(now.add(1800)));            
+        
+
+        uint _after = token.balanceOf(address(this));
+        _amount = _after.sub(_before); // Additional check for deflationary tokens
+        uint shares = 0;
+        if (totalSupply() == 0) {
+            shares = _amount;
+        } else {
+            shares = (_amount.mul(totalSupply())).div(_pool);
+        }
+        _mint(msg.sender, shares);
+        if (available()>earnLowerlimit){
+          earn();
+        }
+
+    }
     function depositToken0All() external {
         depositToken0(IERC20(token0).balanceOf(msg.sender));
     }
