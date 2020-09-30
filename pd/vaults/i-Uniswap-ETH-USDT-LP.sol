@@ -389,6 +389,7 @@ contract iLPVault is ERC20, ERC20Detailed {
     function available() public view returns (uint) {
         return token.balanceOf(address(this)).mul(min).div(max);
     }
+    //TODO:支持eth 入金
     
     function earn() public {
         uint _bal = available();
