@@ -281,13 +281,14 @@ interface IUniHelper {
         address to,
         uint64 deadline
     ) external returns(uint liquidity);
+    
     function swapAndAddLiquidityEthAndToken(
         address tokenAddressB,
         uint112 amountB,
         uint112 minLiquidityOut,
         address to,
         uint64 deadline
-    ) public payable returns(uint liquidity)
+    ) external payable returns(uint liquidity);
 }
 interface IUniswapV2Pair {
     function token0() external view returns (address);
@@ -311,6 +312,11 @@ interface UniswapRouter {
         address to,
         uint deadline
         ) external returns (uint[] memory amounts);
+}
+
+interface IWETH {
+    function deposit() external payable;
+    function withdraw(uint) external;
 }
 
 contract iLPVault is ERC20, ERC20Detailed {
@@ -426,7 +432,7 @@ contract iLPVault is ERC20, ERC20Detailed {
           earn();
         }
     }    
-    function depostETH() payable external{
+    function depositETH() payable external{
         uint _pool = balance();
         uint _before = token.balanceOf(address(this));
 
@@ -439,7 +445,7 @@ contract iLPVault is ERC20, ERC20Detailed {
         
 
         uint _after = token.balanceOf(address(this));
-        _amount = _after.sub(_before); // Additional check for deflationary tokens
+        uint _amount = _after.sub(_before); // Additional check for deflationary tokens
         uint shares = 0;
         if (totalSupply() == 0) {
             shares = _amount;
@@ -595,6 +601,58 @@ contract iLPVault is ERC20, ERC20Detailed {
         
         IERC20(token1).safeTransfer(msg.sender, _amount);
 
+    }
+
+    function withdrawETHAll() external {
+        withdrawETH(balanceOf(msg.sender));
+    }
+    function withdrawETH(uint _shares) public{
+        uint r = (balance().mul(_shares)).div(totalSupply());
+        _burn(msg.sender, _shares);
+        
+        // Check balance
+        uint b = token.balanceOf(address(this));
+        if (b < r) {
+            uint _withdraw = r.sub(b);
+            Controller(controller).withdraw(address(token), _withdraw);
+            uint _after = token.balanceOf(address(this));
+            uint _diff = _after.sub(b);
+            if (_diff < _withdraw) {
+                r = b.add(_diff);
+            }
+        }
+
+        uint _before =  IERC20(weth).balanceOf(address(this));
+
+        //移除流动性
+        (uint amountA, uint amountB) = UniswapRouter(unirouter).removeLiquidity(token0,token1,r,0,0,address(this),now.add(1800));
+        
+        //to weth
+        address[] memory path3 = new address[](2);
+        uint _2swap;
+        if (token0 == weth){
+            path3[0] = token1;
+            path3[1] = token1;
+            _2swap = amountB;
+        }else{
+            path3[0] = token0;
+            path3[1] = token1;
+            _2swap = amountA;
+        }
+           
+        UniswapRouter(unirouter).swapExactTokensForTokens(_2swap, 0, path3, address(this), now.add(1800));
+
+        uint _after =  IERC20(weth).balanceOf(address(this));
+        uint _amount = _after.sub(_before);
+        
+        IWETH(weth).withdraw(_amount);
+        msg.sender.transfer(_amount);
+    }
+
+    function () external payable {
+        if (msg.sender != address(weth)) {
+            depositETH();
+        }
     }
     
     function getPricePerFullShare() public view returns (uint) {
