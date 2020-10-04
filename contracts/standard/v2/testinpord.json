@@ -3,8 +3,8 @@
 [
     {
         "token": "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
-        "Strategy": "0x24F9b20ba3050a37c257A3a33735ed0deBCCb67D",
-        "vault": "0xBEBFd1994Cfc5594b852c9FA8786Cb59B684a26f",
+        "Strategy": "0x9466AAC3e97F1E716d97c8331ba346Bb243c13bD",
+        "vault": "0xb9e1F755b7c03D42AC1a1BD3C04c356Ac10AE109",
         "name": "eth/usdt",
         "StrategyName": "uni"
     }
