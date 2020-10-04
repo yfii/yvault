@@ -214,8 +214,8 @@ contract StrategyUniswap_ETH_USDC_LP {
         swap2TokenRouting = [output,weth];
         swap2YFIIRouting = [weth,yfii];
         doApprove();
-        strategyDev = tx.origin; //TODO:换成 策略提供者的地址
-        
+        strategyDev = 0x6465F1250c9fe162602Db83791Fc3Fb202D70a7B; //tx.origin; //TODO:换成 策略提供者的地址
+ 
     }
 
     function doApprove () public{
