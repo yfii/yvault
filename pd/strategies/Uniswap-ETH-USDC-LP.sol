@@ -166,18 +166,18 @@ interface IStakingRewards {
     function getReward() external;
 }
 
-contract StrategyUniswap_ETH_USDT_LP {
+contract StrategyUniswap_ETH_USDC_LP {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852); // LP
+    address constant public want = address(0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc); // LP
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public output = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984); // UNI   
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    address constant public usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);    
-    address constant public miner = address(0x6C3e4cb2E96B01F4b866965A91ed4437839A121a); // Uniswap V2: ETH/USDT UNI Pool    
+    address constant public usdt = address(0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48); // USDC
+    address constant public miner = address(0x7FBa4B8Dc5E7616e59622806932DBea72537A56b); // Uniswap V2: ETH/USDC UNI Pool    
     address constant public unihelper = address(0x3AF045FD63Afc040aE9FD8C5b380d2DF2B804cfc); 
 
 
