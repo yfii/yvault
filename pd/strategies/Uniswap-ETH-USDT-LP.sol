@@ -178,7 +178,7 @@ contract StrategyUniswap_ETH_USDT_LP {
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);    
     address constant public miner = address(0x6C3e4cb2E96B01F4b866965A91ed4437839A121a); // Uniswap V2: ETH/USDT UNI Pool    
-    address constant public unihelper = address(0x3AF045FD63Afc040aE9FD8C5b380d2DF2B804cfc); 
+    address constant public unihelper = address(0x46041Bf02edd6b0CF93bD0db42370CBF4DA67D0b); 
 
 
 

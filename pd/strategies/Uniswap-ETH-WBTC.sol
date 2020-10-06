@@ -178,7 +178,7 @@ contract StrategyUniswap_ETH_WBTC_LP {
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public usdt = address(0x2260fac5e5542a773aa44fbcfedf7c193bc2c599);  // WBTC
     address constant public miner = address(0xCA35e32e7926b96A9988f61d510E038108d8068e); // Uniswap V2: ETH/WBTC UNI Pool    
-    address constant public unihelper = address(0x3AF045FD63Afc040aE9FD8C5b380d2DF2B804cfc); 
+    address constant public unihelper = address(0x46041Bf02edd6b0CF93bD0db42370CBF4DA67D0b); 
 
 
 

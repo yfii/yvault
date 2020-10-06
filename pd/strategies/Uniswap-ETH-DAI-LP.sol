@@ -178,7 +178,7 @@ contract StrategyUniswap_ETH_DAI_LP {
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
     address constant public usdt = address(0x6b175474e89094c44da98b954eedeac495271d0f); // DAI
     address constant public miner = address(0xa1484C3aa22a66C62b77E0AE78E15258bd0cB711); // Uniswap V2: ETH/DAI UNI Pool    
-    address constant public unihelper = address(0x3AF045FD63Afc040aE9FD8C5b380d2DF2B804cfc); 
+    address constant public unihelper = address(0x46041Bf02edd6b0CF93bD0db42370CBF4DA67D0b); 
 
 
 
