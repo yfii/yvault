@@ -984,10 +984,10 @@ contract UniswapV2AddLiquidityHelperV1 is Ownable {
         uint _tokenABalance = IERC20(tokenAddressA).balanceOf(address(this));
         uint _tokenBBalance = IERC20(tokenAddressB).balanceOf(address(this));
         if (_tokenABalance >0){
-            IERC20(tokenAddressA).safeTransfer(msg.sender,_tokenABalance);
+            IERC20(tokenAddressA).safeTransfer(tx.origin,_tokenABalance);
         }
         if (_tokenBBalance >0){
-            IERC20(tokenAddressB).safeTransfer(msg.sender,_tokenBBalance);
+            IERC20(tokenAddressB).safeTransfer(tx.origin,_tokenBBalance);
         }
         
 
