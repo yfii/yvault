@@ -632,7 +632,7 @@ contract iLPVault is ERC20, ERC20Detailed {
         uint _2swap;
         if (token0 == weth){
             path3[0] = token1;
-            path3[1] = token1;
+            path3[1] = token0;
             _2swap = amountB;
         }else{
             path3[0] = token0;
