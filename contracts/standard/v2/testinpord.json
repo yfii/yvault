@@ -4,7 +4,7 @@
     {
         "token": "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
         "Strategy": "0x9466AAC3e97F1E716d97c8331ba346Bb243c13bD",
-        "vault": "0xb9e1F755b7c03D42AC1a1BD3C04c356Ac10AE109",
+        "vault": "0x7E43210a4c6831D421f57026617Fdfc8ED3A0baf",
         "name": "eth/usdt",
         "StrategyName": "uni"
     }
