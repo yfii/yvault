@@ -349,7 +349,7 @@ contract iLPVault is ERC20, ERC20Detailed {
     ) {
         token = IERC20(_token);
         governance = tx.origin;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         earnLowerlimit = _earnLowerlimit;
         token0 = IUniswapV2Pair(_token).token0();
         token1 = IUniswapV2Pair(_token).token1();
@@ -432,7 +432,7 @@ contract iLPVault is ERC20, ERC20Detailed {
           earn();
         }
     }    
-    function depositETH() payable external{
+    function depositETH() payable public{
         uint _pool = balance();
         uint _before = token.balanceOf(address(this));
 
@@ -632,7 +632,7 @@ contract iLPVault is ERC20, ERC20Detailed {
         uint _2swap;
         if (token0 == weth){
             path3[0] = token1;
-            path3[1] = token1;
+            path3[1] = token0;
             _2swap = amountB;
         }else{
             path3[0] = token0;
