@@ -204,7 +204,7 @@ contract StrategyUniswap_ETH_WBTC_LP {
     
     constructor() public {
         governance = tx.origin;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),
