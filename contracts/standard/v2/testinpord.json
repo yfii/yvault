@@ -1,5 +1,11 @@
 // controller: 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02
 
 [
-
+    {
+        "token": "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
+        "Strategy": "0x9466AAC3e97F1E716d97c8331ba346Bb243c13bD",
+        "vault": "0x7E43210a4c6831D421f57026617Fdfc8ED3A0baf",
+        "name": "eth/usdt",
+        "StrategyName": "uni"
+    }
 ]
