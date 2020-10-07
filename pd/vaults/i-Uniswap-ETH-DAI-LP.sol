@@ -397,7 +397,7 @@ contract iLPVault is ERC20, ERC20Detailed {
     function setEarnLowerlimit(uint256 _earnLowerlimit) public{
       require(msg.sender == governance, "!governance");
       earnLowerlimit = _earnLowerlimit;
-  }
+    }
     
     // Custom logic in here for how much the vault allows to be borrowed
     // Sets minimum required on-hand to keep small withdrawals cheap
