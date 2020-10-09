@@ -171,12 +171,12 @@ contract StrategyUniswap_ETH_WBTC_LP {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xbb2b8038a1640196fbe3e38816f3e67cba72d940); // LP
+    address constant public want = address(0xBb2b8038a1640196FbE3e38816F3e67Cba72D940); // LP
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public output = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984); // UNI   
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    address constant public usdt = address(0x2260fac5e5542a773aa44fbcfedf7c193bc2c599);  // WBTC
+    address constant public usdt = address(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);  // WBTC
     address constant public miner = address(0xCA35e32e7926b96A9988f61d510E038108d8068e); // Uniswap V2: ETH/WBTC UNI Pool    
     address constant public unihelper = address(0x46041Bf02edd6b0CF93bD0db42370CBF4DA67D0b); 
 
