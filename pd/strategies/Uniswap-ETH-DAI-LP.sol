@@ -171,12 +171,12 @@ contract StrategyUniswap_ETH_DAI_LP {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xa478c2975ab1ea89e8196811f51a7b7ade33eb11); // LP
+    address constant public want = address(0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11); // LP
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
     address constant public output = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984); // UNI   
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
-    address constant public usdt = address(0x6b175474e89094c44da98b954eedeac495271d0f); // DAI
+    address constant public usdt = address(0x6B175474E89094C44Da98b954EedeAC495271d0F); // DAI
     address constant public miner = address(0xa1484C3aa22a66C62b77E0AE78E15258bd0cB711); // Uniswap V2: ETH/DAI UNI Pool    
     address constant public unihelper = address(0x46041Bf02edd6b0CF93bD0db42370CBF4DA67D0b); 
 
