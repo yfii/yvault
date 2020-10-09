@@ -7,5 +7,24 @@
         "vault": "0x7E43210a4c6831D421f57026617Fdfc8ED3A0baf",
         "name": "eth/usdt",
         "StrategyName": "uni"
+    },
+    {
+        "token": "0xa478c2975ab1ea89e8196811f51a7b7ade33eb11",
+        "Strategy": "0x41cCed5B81634EcFbd9eCA039aF5dfD05e713B2c",
+        "vault": "0x19d994471D61d36FE367928Cc58102a376089D1f",
+        "name": "eth/dai",
+        "StrategyName": "uni"
+    },{
+        "token": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",
+        "Strategy": "0x1DE7D7AE631Dc4FFac3af9Cb4a9633820ba85Cd8",
+        "vault": "0x68A23248000d5d4C943EE685989998c1B19bD74E",
+        "name": "eth/usdc",
+        "StrategyName": "uni"
+    },{
+        "token": "0xBb2b8038a1640196FbE3e38816F3e67Cba72D940",
+        "Strategy": "0xd24e08bdfefd68138F975035874F38554389A2E6",
+        "vault": "0xb918368082655fA223c162266ecd88Aa7Ae40bc9",
+        "name": "eth/wbtc",
+        "StrategyName": "uni"
     }
 ]
