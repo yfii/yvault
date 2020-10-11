@@ -253,6 +253,9 @@ contract StrategyFortube {
     function withdraw(IERC20 _asset) external returns (uint balance) {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
+        require(wbtc != address(_asset), "wbtc");
+        address _controller = For(fortube).controller();
+        require(IBankController(_controller).getFTokeAddress(want) != address(_asset),"fToken");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
