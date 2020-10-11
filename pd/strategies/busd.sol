@@ -1,4 +1,8 @@
 /**
+ *Submitted for verification at Etherscan.io on 2020-10-11
+*/
+
+/**
  *Submitted for verification at Etherscan.io on 2020-09-13
 */
 
@@ -218,10 +222,10 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
+        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
-                abi.encodePacked(IERC20(want).name(),"The Force Token"
+                abi.encodePacked(IERC20(want).name(),":The Force Token"
                 )
             ));
         swap2YFIIRouting = [output,usdt,weth,yfii];
