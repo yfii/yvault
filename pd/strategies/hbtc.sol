@@ -171,6 +171,11 @@ interface ForReward{
     function claimReward() external;
 }
 
+interface ICurveFi {
+  function exchange(
+    int128 from, int128 to, uint256 _from_amount, uint256 _min_to_amount
+  ) external;
+}
 contract StrategyFortube {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -186,6 +191,11 @@ contract StrategyFortube {
 
     address constant public fortube = address(0xdE7B3b2Fe0E7b4925107615A5b199a4EB40D9ca9);//主合约.
     address constant public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
+
+    address constant public usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7); //usdt /for->usdt
+    address constant public wbtc = address(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599); //for wbtc
+    address constant public curve = address(0x4CA9b3063Ec5866A4B82E437059D2C43d1be596F); //wbtc hbtc
+
 
     
     uint public strategyfee = 100;
@@ -216,8 +226,8 @@ contract StrategyFortube {
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
                 )
             ));
-        swap2YFIIRouting = [output,weth,yfii];
-        swap2TokenRouting = [output,weth,want];
+        swap2YFIIRouting = [output,usdt,weth,yfii];
+        swap2TokenRouting = [output,usdt,weth,wbtc]; //for -> wbtc
         doApprove();
         strategyDev = tx.origin;
     }
@@ -301,6 +311,15 @@ contract StrategyFortube {
         uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
         UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
         UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
+
+         //wbtc -> hbtc curve:
+        uint _wbtc = IERC20(wbtc).balanceOf(address(this));
+        if (_wbtc > 0) {
+            IERC20(wbtc).safeApprove(curve, 0);
+            IERC20(wbtc).safeApprove(curve, _wbtc);
+            ICurveFi(curve).exchange(1, 0, _wbtc, 0);
+        }
+
     }
     function dosplit() internal{
         uint b = IERC20(yfii).balanceOf(address(this));
@@ -372,5 +391,13 @@ contract StrategyFortube {
         require(msg.sender == governance, "!governance");
         require(_withdrawalFee <=100,"fee >= 1%"); //max:1%
         withdrawalFee = _withdrawalFee;
+    }
+    function setSwap2YFII(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swap2YFIIRouting = _path;
+    }
+    function setSwap2Token(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swap2TokenRouting = _path;
     }
 }
