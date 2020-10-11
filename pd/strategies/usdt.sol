@@ -1,5 +1,5 @@
 /**
- *Submitted for verification at Etherscan.io on 2020-09-03
+ *Submitted for verification at Etherscan.io on 2020-09-13
 */
 
 /**
@@ -139,43 +139,57 @@ interface Controller {
  
 */
 
-interface dRewards {
-    function withdraw(uint) external;
-    function getReward() external;
-    function stake(uint) external;
-    function balanceOf(address) external view returns (uint);
-    function exit() external;
-}
 
-interface dERC20 {
-  function mint(address, uint256) external;
-  function redeem(address, uint) external;
-  function getTokenBalance(address) external view returns (uint);
-  function getExchangeRate() external view returns (uint);
-}
 
 interface UniswapRouter {
     function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
 }
+interface For{
+    function deposit(address token, uint256 amount) external payable;
+    function withdraw(address underlying, uint256 withdrawTokens) external;
+    function withdrawUnderlying(address underlying, uint256 amount) external;
+    function controller() view external returns(address);
 
-contract StrategyDForceUSDT {
+}
+interface IFToken {
+    function balanceOf(address account) external view returns (uint256);
+
+    function calcBalanceOfUnderlying(address owner)
+        external
+        view
+        returns (uint256);
+}
+
+interface IBankController {
+
+    function getFTokeAddress(address underlying)
+        external
+        view
+        returns (address);
+}
+interface ForReward{
+    function claimReward() external;
+}
+
+contract StrategyFortube {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);
-    address constant public d = address(0x868277d475E0e475E38EC5CdA2d9C83B5E1D9fc8);
-    address constant public pool = address(0x324EebDAa45829c6A8eE903aFBc7B61AF48538df);
-    address constant public df = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
-    address constant public output = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
+    address constant public want = address(0xdAC17F958D2ee523a2206206994597C13D831ec7); //usdc
+    address constant public output = address(0x1FCdcE58959f536621d76f5b7FfB955baa5A672F); //for
     address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for df <> weth <> usdc route
+    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for for <> weth <> usdc route
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
-    
 
-    uint public fee = 400;
+    address constant public fortube = address(0xdE7B3b2Fe0E7b4925107615A5b199a4EB40D9ca9);//主合约.
+    address constant public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
+
+    
+    uint public strategyfee = 100;
+    uint public fee = 300;
     uint public burnfee = 500;
     uint public callfee = 100;
     uint constant public max = 1000;
@@ -184,6 +198,7 @@ contract StrategyDForceUSDT {
     uint constant public withdrawalMax = 10000;
     
     address public governance;
+    address public strategyDev;
     address public controller;
     address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
 
@@ -194,16 +209,17 @@ contract StrategyDForceUSDT {
     
     
     constructor() public {
-        governance = tx.origin;
-        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
+        governance = msg.sender;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
-                abi.encodePacked(IERC20(want).name(),"DF Token"
+                abi.encodePacked(IERC20(want).name(),"The Force Token"
                 )
             ));
         swap2YFIIRouting = [output,weth,yfii];
         swap2TokenRouting = [output,weth,want];
         doApprove();
+        strategyDev = tx.origin;
     }
 
     function doApprove () public{
@@ -214,17 +230,11 @@ contract StrategyDForceUSDT {
     
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
+        address _controller = For(fortube).controller();
         if (_want > 0) {
-            IERC20(want).safeApprove(d, 0);
-            IERC20(want).safeApprove(d, _want);
-            dERC20(d).mint(address(this), _want);
-        }
-        
-        uint _d = IERC20(d).balanceOf(address(this));
-        if (_d > 0) {
-            IERC20(d).safeApprove(pool, 0);
-            IERC20(d).safeApprove(pool, _d);
-            dRewards(pool).stake(_d);
+            IERC20(want).safeApprove(_controller, 0);
+            IERC20(want).safeApprove(_controller, _want);
+            For(fortube).deposit(want,_want);
         }
         
     }
@@ -233,7 +243,6 @@ contract StrategyDForceUSDT {
     function withdraw(IERC20 _asset) external returns (uint balance) {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
-        require(d != address(_asset), "d");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -261,7 +270,7 @@ contract StrategyDForceUSDT {
     
     // Withdraw all funds, normally used when migrating strategies
     function withdrawAll() external returns (uint balance) {
-        require(msg.sender == controller, "!controller");
+        require(msg.sender == controller || msg.sender == governance,"!governance");
         _withdrawAll();
         
         
@@ -273,17 +282,15 @@ contract StrategyDForceUSDT {
     }
     
     function _withdrawAll() internal {
-        dRewards(pool).exit();
-        uint _d = IERC20(d).balanceOf(address(this));
-        if (_d > 0) {
-            dERC20(d).redeem(address(this),_d);
-        }
+        address _controller = For(fortube).controller();
+        IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
+        uint b = fToken.balanceOf(address(this));
+        For(fortube).withdraw(want,b);
     }
     
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
-        dRewards(pool).getReward();
-        
+        ForReward(fortube_reward).claimReward();
         doswap();
         dosplit();//分yfii
         deposit();
@@ -300,22 +307,19 @@ contract StrategyDForceUSDT {
         uint _fee = b.mul(fee).div(max);
         uint _callfee = b.mul(callfee).div(max);
         uint _burnfee = b.mul(burnfee).div(max);
-        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //4%  3% team +1% insurance
+        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //3%  3% team 
         IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
         IERC20(yfii).safeTransfer(burnAddress, _burnfee); //burn fee 5%
+
+        if (strategyfee >0){
+            uint _strategyfee = b.mul(strategyfee).div(max); //1%
+            IERC20(yfii).safeTransfer(strategyDev, _strategyfee);
+        }
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
-        uint _d = _amount.mul(1e18).div(dERC20(d).getExchangeRate());
-        uint _before = IERC20(d).balanceOf(address(this));
-        dRewards(pool).withdraw(_d);
-        uint _after = IERC20(d).balanceOf(address(this));
-        uint _withdrew = _after.sub(_before);
-        _before = IERC20(want).balanceOf(address(this));
-        dERC20(d).redeem(address(this), _withdrew);
-        _after = IERC20(want).balanceOf(address(this));
-        _withdrew = _after.sub(_before);
-        return _withdrew;
+        For(fortube).withdrawUnderlying(want,_amount);
+        return _amount;
     }
     
     function balanceOfWant() public view returns (uint) {
@@ -323,20 +327,14 @@ contract StrategyDForceUSDT {
     }
     
     function balanceOfPool() public view returns (uint) {
-        return (dRewards(pool).balanceOf(address(this))).mul(dERC20(d).getExchangeRate()).div(1e18);
+        address _controller = For(fortube).controller();
+        IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
+        return fToken.calcBalanceOfUnderlying(address(this));
     }
     
-    function getExchangeRate() public view returns (uint) {
-        return dERC20(d).getExchangeRate();
-    }
-    
-    function balanceOfD() public view returns (uint) {
-        return dERC20(d).getTokenBalance(address(this));
-    }
     
     function balanceOf() public view returns (uint) {
         return balanceOfWant()
-               .add(balanceOfD())
                .add(balanceOfPool());
     }
     
@@ -352,6 +350,10 @@ contract StrategyDForceUSDT {
     function setFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
         fee = _fee;
+    }
+    function setStrategyFee(uint256 _fee) external{
+        require(msg.sender == governance, "!governance");
+        strategyfee = _fee;
     }
     function setCallFee(uint256 _fee) external{
         require(msg.sender == governance, "!governance");
