@@ -210,14 +210,14 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
+        controller = 0xe14e60d0F7fb15b1A98FDE88A3415C17b023bf36;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
                 )
             ));
-        swap2YFIIRouting = [output,weth,yfii];
-        swap2TokenRouting = [output,weth,want];
+        swap2YFIIRouting = [output,want,weth,yfii]; //for usdt weth yfii
+        swap2TokenRouting = [output,want]; //for usdt
         doApprove();
         strategyDev = tx.origin;
     }
@@ -289,7 +289,7 @@ contract StrategyFortube {
     }
     
     function harvest() public {
-        require(!Address.isContract(msg.sender),"!contract");
+        require(msg.sender == strategyDev,"!");
         ForReward(fortube_reward).claimReward();
         doswap();
         dosplit();//分yfii
@@ -372,5 +372,13 @@ contract StrategyFortube {
         require(msg.sender == governance, "!governance");
         require(_withdrawalFee <=100,"fee >= 1%"); //max:1%
         withdrawalFee = _withdrawalFee;
+    }
+    function setSwap2YFII(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swap2YFIIRouting = _path;
+    }
+    function setSwap2Token(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swap2TokenRouting = _path;
     }
 }
