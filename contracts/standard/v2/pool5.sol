@@ -590,7 +590,7 @@ contract LPTokenWrapper {
 
 contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
 
-    IERC20 public MEFI = IERC20(0x1a969239E12F07281f8876D11AfceE081D872adf);
+    IERC20 public OUTTOKEN = IERC20(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
 
     uint256 public constant DURATION = 7 days;
 
@@ -656,7 +656,7 @@ contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            MEFI.safeTransfer(msg.sender, reward);
+            OUTTOKEN.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
