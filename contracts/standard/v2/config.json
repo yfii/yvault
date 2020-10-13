@@ -3,7 +3,7 @@
 [
     {
     "token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    "Strategy":  "0x1a6eC8EB73bf404112475895d6C8814ad5A7bd96", //df
+    "Strategy":  "0x8a61b5f61c8338b86E632c67085A7d80d88fe881", //for
     "Strategy1":  "", //for
     "vault": "0x72Cf258c852Dc485a853370171d46B9D29fD3184",
     "name":"usdt",
@@ -45,13 +45,13 @@
         "StrategyName": "for"
     },{
         "token": "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
-        "Strategy": "0xB5639130ce84dE9684dA10B5E6d6Ec49828E0987",
+        "Strategy": "0x672077cdeac2dF427d4Dc639e7531D2f3e69c597",
         "vault": "0xc46d2fC00554f1f874F37e6e3E828A0AdFEFfbcB",
         "name": "busd",
         "StrategyName": "for"
     },{
         "token": "0x0316eb71485b0ab14103307bf65a021042c6d380",
-        "Strategy": "0xfe6A5A0efb399E2987bEe4d5DB89B925583d144b",
+        "Strategy": "0xC6Cf79574A4138855DFC63fBDFABD9669ccb76C3",
         "vault": "0x26AEdD2205FF8a87AEF2eC9691d77Ce3f40CE6E9",
         "name": "hbtc",
         "StrategyName": "for"
