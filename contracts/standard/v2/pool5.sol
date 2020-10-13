@@ -600,6 +600,7 @@ contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
     uint256 public rewardPerTokenStored;
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
+    mapping(address => uint256) public canWithdrawTime;
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
@@ -638,11 +639,13 @@ contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
     function stake(uint256 amount) public updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         super.stake(amount);
+        canWithdrawTime[msg.sender] = now+3 days;
         emit Staked(msg.sender, amount);
     }
 
     function withdraw(uint256 amount) public updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
+        require(now>canWithdrawTime[msg.sender],"!3 days");
         super.withdraw(amount);
         emit Withdrawn(msg.sender, amount);
     }
