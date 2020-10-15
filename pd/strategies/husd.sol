@@ -145,10 +145,6 @@ interface UniswapRouter {
     function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
 }
 
-interface yERC20 {
-  function deposit(uint256 _amount) external;
-  function withdraw(uint256 _amount) external;
-}
 
 interface ICurveFi {
 
