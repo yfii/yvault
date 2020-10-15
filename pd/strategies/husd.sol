@@ -162,11 +162,8 @@ contract StrategyCurveHUSD {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public want = address(0xdF574c24545E5FfEcb9a659c229253D4111d87e1); //husd
-    address constant public curve = address(0x0a53FaDa2d943057C47A301D25a4D9b3B8e01e8E); //husd -> husd3crv
+    address constant public want = address(0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858); //husd3crv
     
-    address constant public husd3crv = address(0x5B5CFE992AdAC0C9D48E05854B2d91C73a003858);
-
     address constant public pool = address(0x2db0E83599a91b508Ac268a6197b8B14F5e72840);
 
     address constant public mintr = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
@@ -179,7 +176,7 @@ contract StrategyCurveHUSD {
     address constant public dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F); // used for crv <> weth <> dai route
 
 
-    address constant public curveswap = address(0x3eF6A01A0f81D6046290f3e2A8c5b843e738E604);
+    address constant public curve = address(0x0a53FaDa2d943057C47A301D25a4D9b3B8e01e8E); //husd -> husd3crv
 
 
     address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
@@ -194,7 +191,6 @@ contract StrategyCurveHUSD {
     uint public withdrawalFee = 0;
     uint constant public withdrawalMax = 10000;
 
-    uint MaximumSingleDeposit = 100000 * 1e8; //10w husd
     
     address public governance;
     address public controller;
@@ -227,18 +223,13 @@ contract StrategyCurveHUSD {
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
         
-        //husd -> husd3crv
-        IERC20(want).safeApprove(curve, 0);
-        IERC20(want).safeApprove(curve, uint(-1));
-        
         //husd3crv -> pool
-        IERC20(husd3crv).safeApprove(pool, 0);
-        IERC20(husd3crv).safeApprove(pool, uint(-1));
+        IERC20(want).safeApprove(pool, 0);
+        IERC20(want).safeApprove(pool, uint(-1));
 
-
-        //dai ->husd
-        IERC20(dai).safeApprove(curveswap, 0);
-        IERC20(dai).safeApprove(curveswap, uint(-1));
+        //dai ->husd3crv
+        IERC20(dai).safeApprove(curve, 0);
+        IERC20(dai).safeApprove(curve, uint(-1));
         
     }
     
@@ -246,14 +237,6 @@ contract StrategyCurveHUSD {
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
         if (_want > 0) {
-            if (_want > MaximumSingleDeposit){
-                _want = MaximumSingleDeposit;
-            }
-            ICurveFi(curve).add_liquidity([0,0,_want,0],0);
-        }
-
-        uint _husd3crv = IERC20(husd3crv).balanceOf(address(this));
-        if (_husd3crv > 0){
             Gauge(pool).deposit(_husd3crv);
         }
     }
@@ -264,7 +247,6 @@ contract StrategyCurveHUSD {
         require(want != address(_asset), "want");
         require(crv != address(_asset), "crv");
         require(dai != address(_asset), "dai");
-        require(husd3crv != address(_asset), "husd3crv");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -322,9 +304,10 @@ contract StrategyCurveHUSD {
         UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
         UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
 
+        //dai -> husd3crv
         uint _dai = IERC20(dai).balanceOf(address(this));
         if (_dai > 0) {
-            ICurveFi(curveswap).exchange_underlying(1,0,_dai,0);
+            ICurveFi(curve).add_liquidity([0,_dai,0,0],0);
         }
         
 
@@ -409,8 +392,4 @@ contract StrategyCurveHUSD {
         swap2TokenRouting = _path;
     }
 
-    function setMaximumSingleDeposit(uint _MaximumSingleDeposit) external{
-        require(msg.sender == governance, "!governance");
-        MaximumSingleDeposit = _MaximumSingleDeposit;
-    }
 }
