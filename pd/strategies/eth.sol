@@ -195,6 +195,9 @@ contract StrategyFortube {
     address constant public fortube = address(0xdE7B3b2Fe0E7b4925107615A5b199a4EB40D9ca9);//主合约.
     address constant public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
 
+    address constant public usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+
+
     
     uint public strategyfee = 100;
     uint public fee = 300;
@@ -218,14 +221,14 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
+        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),"The Force Token"
                 )
             ));
-        swap2YFIIRouting = [output,weth,yfii];
-        swap2TokenRouting = [output,weth];//for->weth
+        swap2YFIIRouting = [output,usdt,weth,yfii];
+        swap2TokenRouting = [output,usdt,weth];//for->weth
         doApprove();
         strategyDev = tx.origin;
     }
@@ -384,5 +387,13 @@ contract StrategyFortube {
         require(msg.sender == governance, "!governance");
         require(_withdrawalFee <=100,"fee >= 1%"); //max:1%
         withdrawalFee = _withdrawalFee;
+    }
+    function setSwap2YFII(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swap2YFIIRouting = _path;
+    }
+    function setSwap2Token(address[] memory _path) public{
+        require(msg.sender == governance, "!governance");
+        swap2TokenRouting = _path;
     }
 }
