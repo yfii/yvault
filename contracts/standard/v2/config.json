@@ -32,14 +32,14 @@
     },
     {
     "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "Strategy":  "0x17D5C3FFe2A7c7a1E4567c7501d166B0532C8826",
+    "Strategy":  "0xC96EA19A7bD3D4f04d6d67E20CDe88e88352Fd14",
     "vault": "0x23B4dB3a435517fd5f2661a9c5a16f78311201c1",
     "name":"usdc",
     "StrategyName":"for"
     },
     {
         "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-        "Strategy": "0x0c3E69eF29cbD32e0732409B748ef317a5F4f0a5",
+        "Strategy": "0x6FC7Be79036D0D610B252D435177A687EB39c44a",
         "vault": "0xa8EA49a9e242fFfBdECc4583551c3BcB111456E6",
         "name": "eth",
         "StrategyName": "for"
