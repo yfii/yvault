@@ -289,6 +289,7 @@ contract iVault is ERC20, ERC20Detailed {
     using SafeMath for uint256;
     
     IERC20 public token;
+    IERC20 public husd = IERC20(address(0xdF574c24545E5FfEcb9a659c229253D4111d87e1));
     
     uint public min = 9500;
     uint public constant max = 10000;
@@ -297,7 +298,6 @@ contract iVault is ERC20, ERC20Detailed {
     
     address public governance;
     address public controller;
-    address constant public husd = IERC20(address(0xdF574c24545E5FfEcb9a659c229253D4111d87e1)); //husd
     address constant public curve = address(0x0a53FaDa2d943057C47A301D25a4D9b3B8e01e8E); //husd -> husd3crv
     
     constructor (address _token,uint _earnLowerlimit) public ERC20Detailed(
