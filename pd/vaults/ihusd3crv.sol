@@ -374,7 +374,7 @@ contract iVault is ERC20, ERC20Detailed {
         //husd ->husd3crv
         require(_amount<maximumSingleDeposit,"recharge amount is too large");
         husd.safeTransferFrom(msg.sender, address(this), _amount);
-        ICurveFi(curve).add_liquidity([0,0,_amount,0],0);
+        ICurveFi(curve).add_liquidity([_amount,0,0,0],0);
 
 
         uint _after = token.balanceOf(address(this));
