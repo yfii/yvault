@@ -307,7 +307,7 @@ contract iVault is ERC20, ERC20Detailed {
     ) {
         token = IERC20(_token);
         governance = tx.origin;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         earnLowerlimit = _earnLowerlimit;
         doApprove();
     }
