@@ -205,7 +205,7 @@ contract StrategyCurveHUSD {
     
     constructor() public {
         governance = tx.origin;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
+        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
                 abi.encodePacked(IERC20(want).name(),
@@ -237,7 +237,7 @@ contract StrategyCurveHUSD {
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
         if (_want > 0) {
-            Gauge(pool).deposit(_husd3crv);
+            Gauge(pool).deposit(_want);
         }
     }
     
