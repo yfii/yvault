@@ -271,6 +271,17 @@ interface Controller {
     function balanceOf(address) external view returns (uint);
     function earn(address, uint) external;
 }
+interface ICurveFi {
+
+  function add_liquidity(
+    uint256[4] calldata amounts,
+    uint256 min_mint_amount
+  ) external;
+  function exchange_underlying(
+    int128 from, int128 to, uint256 _from_amount, uint256 _min_to_amount
+  ) external;
+  function remove_liquidity_one_coin(uint256 _token_amount, int128 i, uint256 min_uamount) external;
+}
 
 contract iVault is ERC20, ERC20Detailed {
     using SafeERC20 for IERC20;
@@ -282,9 +293,12 @@ contract iVault is ERC20, ERC20Detailed {
     uint public min = 9500;
     uint public constant max = 10000;
     uint public earnLowerlimit; //池内空余资金到这个值就自动earn
+    uint public maximumSingleDeposit = 100000*1e8; //10w husd 
     
     address public governance;
     address public controller;
+    address constant public husd = IERC20(address(0xdF574c24545E5FfEcb9a659c229253D4111d87e1)); //husd
+    address constant public curve = address(0x0a53FaDa2d943057C47A301D25a4D9b3B8e01e8E); //husd -> husd3crv
     
     constructor (address _token,uint _earnLowerlimit) public ERC20Detailed(
         string(abi.encodePacked("yfii ", ERC20Detailed(_token).name())),
@@ -295,6 +309,18 @@ contract iVault is ERC20, ERC20Detailed {
         governance = tx.origin;
         controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
         earnLowerlimit = _earnLowerlimit;
+        doApprove();
+    }
+
+    function doApprove() public{
+
+        //husd->husd3crv
+        husd.safeApprove(curve, 0);
+        husd.safeApprove(curve, uint(-1));        
+
+        //husd3crv->husd
+        token.safeApprove(curve, 0);
+        token.safeApprove(curve, uint(-1));
     }
     
     function balance() public view returns (uint) {
@@ -319,7 +345,11 @@ contract iVault is ERC20, ERC20Detailed {
     function setEarnLowerlimit(uint256 _earnLowerlimit) public{
       require(msg.sender == governance, "!governance");
       earnLowerlimit = _earnLowerlimit;
-  }
+    }    
+    function setMaximumSingleDeposit(uint256 _maximumSingleDeposit) public{
+      require(msg.sender == governance, "!governance");
+      maximumSingleDeposit = _maximumSingleDeposit;
+    }
     
     // Custom logic in here for how much the vault allows to be borrowed
     // Sets minimum required on-hand to keep small withdrawals cheap
@@ -334,13 +364,19 @@ contract iVault is ERC20, ERC20Detailed {
     }
     
     function depositAll() external {
-        deposit(token.balanceOf(msg.sender));
+        deposit(husd.balanceOf(msg.sender));
     }
     
     function deposit(uint _amount) public {
         uint _pool = balance();
         uint _before = token.balanceOf(address(this));
-        token.safeTransferFrom(msg.sender, address(this), _amount);
+
+        //husd ->husd3crv
+        require(_amount<maximumSingleDeposit,"recharge amount is too large");
+        husd.safeTransferFrom(msg.sender, address(this), _amount);
+        ICurveFi(curve).add_liquidity([0,0,_amount,0],0);
+
+
         uint _after = token.balanceOf(address(this));
         _amount = _after.sub(_before); // Additional check for deflationary tokens
         uint shares = 0;
@@ -378,7 +414,13 @@ contract iVault is ERC20, ERC20Detailed {
             }
         }
         
-        token.safeTransfer(msg.sender, r);
+        //
+        // token.safeTransfer(msg.sender, r);
+        uint _beforeHUSD = husd.balanceOf(address(this));
+        ICurveFi(curve).remove_liquidity_one_coin(r,0,0);
+        uint _afterHUSD = husd.balanceOf(address(this));
+        uint _amountHUSD = _afterHUSD-_beforeHUSD;
+        husd.safeTransfer(msg.sender, _amountHUSD);
     }
     
     function getPricePerFullShare() public view returns (uint) {
