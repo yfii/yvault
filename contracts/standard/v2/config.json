@@ -32,14 +32,14 @@
     },
     {
     "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "Strategy":  "0x17D5C3FFe2A7c7a1E4567c7501d166B0532C8826",
+    "Strategy":  "0xC96EA19A7bD3D4f04d6d67E20CDe88e88352Fd14",
     "vault": "0x23B4dB3a435517fd5f2661a9c5a16f78311201c1",
     "name":"usdc",
     "StrategyName":"for"
     },
     {
         "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-        "Strategy": "0x0c3E69eF29cbD32e0732409B748ef317a5F4f0a5",
+        "Strategy": "0x6FC7Be79036D0D610B252D435177A687EB39c44a",
         "vault": "0xa8EA49a9e242fFfBdECc4583551c3BcB111456E6",
         "name": "eth",
         "StrategyName": "for"
@@ -55,5 +55,33 @@
         "vault": "0x26AEdD2205FF8a87AEF2eC9691d77Ce3f40CE6E9",
         "name": "hbtc",
         "StrategyName": "for"
+    },
+    {
+        "token": "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852",
+        "Strategy": "0x9466AAC3e97F1E716d97c8331ba346Bb243c13bD",
+        "vault": "0x7E43210a4c6831D421f57026617Fdfc8ED3A0baf",
+        "name": "eth/usdt",
+        "StrategyName": "uni"
+    },
+    {
+        "token": "0xa478c2975ab1ea89e8196811f51a7b7ade33eb11",
+        "Strategy": "0x41cCed5B81634EcFbd9eCA039aF5dfD05e713B2c",
+        "vault": "0x19d994471D61d36FE367928Cc58102a376089D1f",
+        "name": "eth/dai",
+        "StrategyName": "uni"
+    },
+    {
+        "token": "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",
+        "Strategy": "0x1DE7D7AE631Dc4FFac3af9Cb4a9633820ba85Cd8",
+        "vault": "0x68A23248000d5d4C943EE685989998c1B19bD74E",
+        "name": "eth/usdc",
+        "StrategyName": "uni"
+    },
+    {
+        "token": "0xBb2b8038a1640196FbE3e38816F3e67Cba72D940",
+        "Strategy": "0xd24e08bdfefd68138F975035874F38554389A2E6",
+        "vault": "0xb918368082655fA223c162266ecd88Aa7Ae40bc9",
+        "name": "eth/wbtc",
+        "StrategyName": "uni"
     }
 ]
