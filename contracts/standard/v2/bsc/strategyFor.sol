@@ -1,4 +1,12 @@
 /**
+ *Submitted for verification at BscScan.com on 2020-09-19
+*/
+
+/**
+ *Submitted for verification at Bscscan.com on 2020-09-17
+*/
+
+/**
  *Submitted for verification at Etherscan.io on 2020-08-13
 */
 
@@ -173,7 +181,7 @@ contract StrategyFortube {
     using SafeMath for uint256;
     
     address constant public output = address(0x658A109C5900BC6d2357c87549B651670E5b0539); //for
-    address constant public unirouter = address(0x75Ca8F6c82df5FdFd09049f46AD5d072b0a53BF6);
+    address  public unirouter = address(0x9FdC672a33f34675253041671abd214F2387b7aB);
     address constant public weth = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // used for for <> weth <> usdc route
 
     address constant public yfii = address(0x7F70642d88cf1C4a3a7abb072B53B929b653edA5);
@@ -228,6 +236,10 @@ contract StrategyFortube {
     function setFortubeReward(address _reward) public {
         require(msg.sender == governance, "!governance");
         fortube_reward = _reward;
+    }    
+    function setUnirouter(address _unirouter) public {
+        require(msg.sender == governance, "!governance");
+        unirouter = _unirouter;
     }
     
     
