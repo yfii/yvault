@@ -254,7 +254,6 @@ contract iVault is ERC20, ERC20Detailed {
 
     uint public min = 9990;
     uint public constant max = 10000;
-    uint public earnLowerlimit = 50 ether; //池内空余资金到这个值就自动earn
 
     address public governance;
     address public controller;
@@ -287,10 +286,6 @@ contract iVault is ERC20, ERC20Detailed {
     function setController(address _controller) public {
         require(msg.sender == governance, "!governance");
         controller = _controller;
-    }
-    function setEarnLowerlimit(uint256 _earnLowerlimit) public{
-      require(msg.sender == governance, "!governance");
-      earnLowerlimit = _earnLowerlimit;
     }
 
     // Custom logic in here for how much the vault allows to be borrowed
