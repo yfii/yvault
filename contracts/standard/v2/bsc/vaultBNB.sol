@@ -323,7 +323,7 @@ contract iVault is ERC20, ERC20Detailed {
         }
         _mint(msg.sender, shares);
         
-        earn()
+        earn();
     }
 
     function depositETH() public payable {
@@ -340,7 +340,7 @@ contract iVault is ERC20, ERC20Detailed {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
         _mint(msg.sender, shares);
-        earn()
+        earn();
     }
 
     function withdrawAll() external {
