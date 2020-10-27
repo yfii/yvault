@@ -179,17 +179,17 @@ contract StrategyFortube {
     using Address for address;
     using SafeMath for uint256;
     
-    address constant public eth_address = address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
-    address constant public want = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); //eth
-    address constant public output = address(0x1FCdcE58959f536621d76f5b7FfB955baa5A672F); //for
-    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for for <> weth <> usdc route
+    address constant public eth_address = address(0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB);
+    address constant public want = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); //wbnb
+    address constant public output = address(0x658A109C5900BC6d2357c87549B651670E5b0539); //for
+    address  public unirouter = address(0xBf6527834dBB89cdC97A79FCD62E6c08B19F8ec0);
+    address constant public weth = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // used for for <> weth <> usdc route
 
-    address constant public yfii = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
+    address constant public yfii = address(0x7F70642d88cf1C4a3a7abb072B53B929b653edA5);
 
 
-    address constant public fortube = address(0xdE7B3b2Fe0E7b4925107615A5b199a4EB40D9ca9);//主合约.
-    address constant public fortube_reward = address(0xF8Df2E6E46AC00Cdf3616C4E35278b7704289d82); //领取奖励的合约
+    address constant public fortube = address(0x0cEA0832e9cdBb5D476040D58Ea07ecfbeBB7672);//主合约.
+    address constant public fortube_reward = address(0x55838F18e79cFd3EA22Eea08Bd3Ec18d67f314ed); //领取奖励的合约
 
     
     uint public strategyfee = 100;
@@ -214,10 +214,10 @@ contract StrategyFortube {
     
     constructor() public {
         governance = msg.sender;
-        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
+        controller = 0x5B916D02A9745C64EC6C0AFe41Ee4893Dd5a01B7;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
-                abi.encodePacked(IERC20(want).name(),"The Force Token"
+                abi.encodePacked(IERC20(want).name(),":The Force Token"
                 )
             ));
         swap2YFIIRouting = [output,weth,yfii];
@@ -231,7 +231,14 @@ contract StrategyFortube {
         IERC20(output).safeApprove(unirouter, uint(-1));
     }
 
-
+    function setFortubeReward(address _reward) public {
+        require(msg.sender == governance, "!governance");
+        fortube_reward = _reward;
+    }    
+    function setUnirouter(address _unirouter) public {
+        require(msg.sender == governance, "!governance");
+        unirouter = _unirouter;
+    }
         
     function () external payable {
     }
@@ -250,6 +257,8 @@ contract StrategyFortube {
     function withdraw(IERC20 _asset) external returns (uint balance) {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
+        address _controller = For(fortube).controller();
+        require(IBankController(_controller).getFTokeAddress(want) != address(_asset),"fToken");
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -305,22 +314,22 @@ contract StrategyFortube {
 
     function doswap() internal {
         uint256 _2token = IERC20(output).balanceOf(address(this)).mul(90).div(100); //90%
-        uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
+        // uint256 _2yfii = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
         UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
-        UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
+        // UniswapRouter(unirouter).swapExactTokensForTokens(_2yfii, 0, swap2YFIIRouting, address(this), now.add(1800));
     }
     function dosplit() internal{
         uint b = IERC20(yfii).balanceOf(address(this));
         uint _fee = b.mul(fee).div(max);
         uint _callfee = b.mul(callfee).div(max);
         uint _burnfee = b.mul(burnfee).div(max);
-        IERC20(yfii).safeTransfer(Controller(controller).rewards(), _fee); //3%  3% team 
-        IERC20(yfii).safeTransfer(msg.sender, _callfee); //call fee 1%
-        IERC20(yfii).safeTransfer(burnAddress, _burnfee); //burn fee 5%
+        IERC20(want).safeTransfer(Controller(controller).rewards(), _fee); //3%  3% team 
+        IERC20(want).safeTransfer(msg.sender, _callfee); //call fee 1%
+        IERC20(want).safeTransfer(burnAddress, _burnfee); //burn fee 5%
 
         if (strategyfee >0){
             uint _strategyfee = b.mul(strategyfee).div(max); //1%
-            IERC20(yfii).safeTransfer(strategyDev, _strategyfee);
+            IERC20(want).safeTransfer(strategyDev, _strategyfee);
         }
     }
     
