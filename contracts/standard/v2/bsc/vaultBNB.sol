@@ -266,7 +266,7 @@ contract iVault is ERC20, ERC20Detailed {
     ) {
         token = IERC20(_token);
         governance = msg.sender;
-        controller = 0xcDCf1f9Ac816Fed665B09a00f60c885dd8848b02;
+        controller = 0x5B916D02A9745C64EC6C0AFe41Ee4893Dd5a01B7;
     }
 
     function balance() public view returns (uint) {
@@ -322,9 +322,8 @@ contract iVault is ERC20, ERC20Detailed {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
         _mint(msg.sender, shares);
-        if (token.balanceOf(address(this))>earnLowerlimit){
-          earn();
-        }
+        
+        earn()
     }
 
     function depositETH() public payable {
@@ -341,6 +340,7 @@ contract iVault is ERC20, ERC20Detailed {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
         _mint(msg.sender, shares);
+        earn()
     }
 
     function withdrawAll() external {
