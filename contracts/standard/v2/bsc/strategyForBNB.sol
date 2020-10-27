@@ -189,7 +189,7 @@ contract StrategyFortube {
 
 
     address constant public fortube = address(0x0cEA0832e9cdBb5D476040D58Ea07ecfbeBB7672);//主合约.
-    address constant public fortube_reward = address(0x55838F18e79cFd3EA22Eea08Bd3Ec18d67f314ed); //领取奖励的合约
+    address  public fortube_reward = address(0x55838F18e79cFd3EA22Eea08Bd3Ec18d67f314ed); //领取奖励的合约
 
     
     uint public strategyfee = 100;
