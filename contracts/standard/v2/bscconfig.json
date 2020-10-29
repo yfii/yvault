@@ -14,5 +14,19 @@
     "vault": "0xeB3C085FBc1030bb127114CB1A3B9A02A24eF62d",
     "name":"busd",
     "StrategyName":""
+    },
+    {
+    "token": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    "Strategy":  "0xD601e0dBcbBb2e976d5B499c811e2EdAe304C634",
+    "vault": "0x72dd5Df626ebBc020fdF431502799413c56Ac12C",
+    "name":"bnb",
+    "StrategyName":"for"
+    },
+    {
+    "token": "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
+    "Strategy":  "0x06B8759925b3F49A2aFc13D7ff4dCc7E3B0ef323",
+    "vault": "0xb98f8339CD3CD50701aCdE307875B78c373e6515",
+    "name":"eth",
+    "StrategyName":"for"
     }
 ]
