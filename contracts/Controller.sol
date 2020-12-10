@@ -177,8 +177,8 @@ contract Controller {
     
     constructor() public {
         governance = tx.origin;
-        onesplit = address(0x50FDA034C0Ce7a8f7EFDAebDA7Aa7cA21CC1267e);
-        rewards = 0x887F507EaAc58adD20263C6918538A9BdC882d47; 
+        onesplit = address(0x50FDA034C0Ce7a8f7EFDAebDA7Aa7cA21CC1267e); // ????
+        rewards = 0x887F507EaAc58adD20263C6918538A9BdC882d47;  //獎勵帳號
     }
     
     function setFactory(address _factory) public {

@@ -1,191 +1,17 @@
-/**
- *Submitted for verification at Bscscan.com on 2020-09-19
-*/
-
-/**
- *Submitted for verification at Bscscan.com on 2020-09-17
-*/
-
-/**
- *Submitted for verification at Etherscan.io on 2020-08-13
-*/
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity ^0.5.17;
-
-interface IERC20 {
-    function totalSupply() external view returns (uint256);
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 amount) external returns (bool);
-    function allowance(address owner, address spender) external view returns (uint256);
-    function decimals() external view returns (uint);
-    function name() external view returns (string memory);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-library SafeMath {
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-
-        return c;
-    }
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, "SafeMath: subtraction overflow");
-    }
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        uint256 c = a - b;
-
-        return c;
-    }
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-
-        return c;
-    }
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, "SafeMath: division by zero");
-    }
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        // Solidity only automatically asserts when dividing by 0
-        require(b > 0, errorMessage);
-        uint256 c = a / b;
-
-        return c;
-    }
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, "SafeMath: modulo by zero");
-    }
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b != 0, errorMessage);
-        return a % b;
-    }
-}
-
-library Address {
-    function isContract(address account) internal view returns (bool) {
-        bytes32 codehash;
-        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
-        // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
-        return (codehash != 0x0 && codehash != accountHash);
-    }
-    function toPayable(address account) internal pure returns (address payable) {
-        return address(uint160(account));
-    }
-    function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
-
-        // solhint-disable-next-line avoid-call-value
-        (bool success, ) = recipient.call.value(amount)("");
-        require(success, "Address: unable to send value, recipient may have reverted");
-    }
-}
-
-library SafeERC20 {
-    using SafeMath for uint256;
-    using Address for address;
-
-    function safeTransfer(IERC20 token, address to, uint256 value) internal {
-        callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
-    }
-
-    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
-        callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
-    }
-
-    function safeApprove(IERC20 token, address spender, uint256 value) internal {
-        require((value == 0) || (token.allowance(address(this), spender) == 0),
-            "SafeERC20: approve from non-zero to non-zero allowance"
-        );
-        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
-    }
-    function callOptionalReturn(IERC20 token, bytes memory data) private {
-        require(address(token).isContract(), "SafeERC20: call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = address(token).call(data);
-        require(success, "SafeERC20: low-level call failed");
-
-        if (returndata.length > 0) { // Return data is optional
-            // solhint-disable-next-line max-line-length
-            require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
-        }
-    }
-}
-
-interface Controller {
-    function vaults(address) external view returns (address);
-    function rewards() external view returns (address);
-}
-
-/*
-
- A strategy must implement the following calls;
- 
- - deposit()
- - withdraw(address) must exclude any tokens used in the yield - Controller role - withdraw should return to Controller
- - withdraw(uint) - Controller | Vault role - withdraw should always return to vault
- - withdrawAll() - Controller | Vault role - withdraw should always return to vault
- - balanceOf()
- 
- Where possible, strategies must remain as immutable as possible, instead of updating variables, we update the contract by linking it in the controller
- 
-*/
 
 
 
-interface UniswapRouter {
-    function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
-}
-interface For{
-    function deposit(address token, uint256 amount) external payable;
-    function withdraw(address underlying, uint256 withdrawTokens) external;
-    function withdrawUnderlying(address underlying, uint256 amount) external;
-    function controller() view external returns(address);
-
-}
-interface IFToken {
-    function balanceOf(address account) external view returns (uint256);
-
-    function calcBalanceOfUnderlying(address owner)
-        external
-        view
-        returns (uint256);
-}
-
-interface IBankController {
-
-    function getFTokeAddress(address underlying)
-        external
-        view
-        returns (address);
-}
-interface ForReward{
-    function claimReward() external;
-}
-
+///////////
 contract StrategyFortube {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
     
     address constant public output = address(0x658A109C5900BC6d2357c87549B651670E5b0539); //for
-    address  public unirouter = address(0x039B5818e51dfEC86c1D56A4668787AF0Ed1c068); // Unisave
+    address  public unirouter = address(0x039B5818e51dfEC86c1D56A4668787AF0Ed1c068); // unisave 
     address constant public weth = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // used for for <> weth <> usdc route
 
     address constant public yfii = address(0x7F70642d88cf1C4a3a7abb072B53B929b653edA5);
-
 
     address constant public fortube = address(0x0cEA0832e9cdBb5D476040D58Ea07ecfbeBB7672);//主合约.
     address  public fortube_reward = address(0x55838F18e79cFd3EA22Eea08Bd3Ec18d67f314ed); //领取奖励的合约
@@ -205,7 +31,7 @@ contract StrategyFortube {
     address public governance;
     address public strategyDev;
     address public controller;
-    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
+    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a; //設置燒毀帳號
 
     string public getName;
 
@@ -215,7 +41,7 @@ contract StrategyFortube {
     
     constructor(address _want) public {
         want = _want;
-        governance = msg.sender;
+        governance = msg.sender; /// msg.sender or tx.origin?
         controller = 0x5B916D02A9745C64EC6C0AFe41Ee4893Dd5a01B7;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
@@ -228,7 +54,7 @@ contract StrategyFortube {
         strategyDev = tx.origin;
     }
 
-    function doApprove () public{
+    function doApprove () public{  //設置通過 Approve 動作
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
     }
@@ -237,16 +63,16 @@ contract StrategyFortube {
         require(msg.sender == governance, "!governance");
         fortube_reward = _reward;
     }    
-    function setUnirouter(address _unirouter) public {
+    function setUnirouter(address _unirouter) public {  // 設置前面設置的 Router 去販賣
         require(msg.sender == governance, "!governance");
         unirouter = _unirouter;
     }
     
     
-    function deposit() public {
+    function deposit() public {  // 將手上的BEP20進行充值
         uint _want = IERC20(want).balanceOf(address(this));
         address _controller = For(fortube).controller();
-        if (_want > 0) {
+        if (_want > 0) { //充入金額必須大於零啊
             IERC20(want).safeApprove(_controller, 0);
             IERC20(want).safeApprove(_controller, _want);
             For(fortube).deposit(want,_want);
@@ -257,7 +83,11 @@ contract StrategyFortube {
     function withdraw(IERC20 _asset) external returns (uint balance) {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
+        address _controller = For(fortube).controller();
+        /////////// 要求Controller 不能跟所得到的 fToken 為同一個地址  /////////// /////////// 
+        require(IBankController(_controller).getFTokeAddress(want) != address(_asset),"fToken");
         balance = _asset.balanceOf(address(this));
+        ////////////////////////////////////////////////////////////////////////////////
         _asset.safeTransfer(controller, balance);
     }
     
@@ -304,10 +134,10 @@ contract StrategyFortube {
     
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
-        ForReward(fortube_reward).claimReward();
-        doswap();
-        dosplit();//分yfii
-        deposit();
+        ForReward(fortube_reward).claimReward();  //收割利息，將獎勵代幣賣掉
+        doswap();  // 賣, Exchange 
+        dosplit(); //分yfii
+        deposit(); 
     }
 
     function doswap() internal {
@@ -340,7 +170,7 @@ contract StrategyFortube {
         return IERC20(want).balanceOf(address(this));
     }
     
-    function balanceOfPool() public view returns (uint) {
+    function balanceOfPool() public view returns (uint) { // Pool 之中佔比
         address _controller = For(fortube).controller();
         IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
         return fToken.calcBalanceOfUnderlying(address(this));

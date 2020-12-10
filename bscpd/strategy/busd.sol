@@ -271,7 +271,7 @@ contract StrategyFortube {
             _amount = _amount.add(_balance);
         }
         
-        uint _fee = 0;
+        uint _fee = 0;  
         if (withdrawalFee>0){
             _fee = _amount.mul(withdrawalFee).div(withdrawalMax);        
             IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
@@ -306,7 +306,7 @@ contract StrategyFortube {
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
         ForReward(fortube_reward).claimReward();
-        doswap();
+        doswap(); 
         dosplit();//分yfii
         deposit();
     }

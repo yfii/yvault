@@ -195,7 +195,7 @@ contract YFII is ERC20, ERC20Detailed {
   using Address for address;
   using SafeMath for uint;
   
-  
+
   address public governance;
   mapping (address => bool) public minters;
 
