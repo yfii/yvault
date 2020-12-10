@@ -181,7 +181,7 @@ contract StrategyFortube {
     using SafeMath for uint256;
     
     address constant public output = address(0x658A109C5900BC6d2357c87549B651670E5b0539); //for
-    address  public unirouter = address(0x9FdC672a33f34675253041671abd214F2387b7aB);
+    address  public unirouter = address(0x039B5818e51dfEC86c1D56A4668787AF0Ed1c068); // Unisave
     address constant public weth = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // used for for <> weth <> usdc route
 
     address constant public yfii = address(0x7F70642d88cf1C4a3a7abb072B53B929b653edA5);
@@ -205,7 +205,7 @@ contract StrategyFortube {
     address public governance;
     address public strategyDev;
     address public controller;
-    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
+    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a; // ?
 
     string public getName;
 
