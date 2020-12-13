@@ -1,19 +1,10 @@
 /**
  *Submitted for verification at Bscscan.com on 2020-09-19
-*/
-
-/**
  *Submitted for verification at Bscscan.com on 2020-09-17
-*/
-
-/**
  *Submitted for verification at Etherscan.io on 2020-08-13
 */
-
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.5.17;
-
 interface IERC20 {
     function totalSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);

@@ -86,8 +86,8 @@ contract StrategyFortube {
         address _controller = For(fortube).controller();
         /////////// 要求Controller 不能跟所得到的 fToken 為同一個地址  /////////// /////////// 
         require(IBankController(_controller).getFTokeAddress(want) != address(_asset),"fToken");
-        balance = _asset.balanceOf(address(this));
         ////////////////////////////////////////////////////////////////////////////////
+        balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
     

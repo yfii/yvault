@@ -283,7 +283,6 @@ contract Controller {
             }
         }
     }
-    
     function withdraw(address _token, uint _amount) public {
         require(msg.sender == vaults[_token], "!vault");
         Strategy(strategies[_token]).withdraw(_amount);
