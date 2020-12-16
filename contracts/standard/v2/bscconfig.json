@@ -28,5 +28,12 @@
     "vault": "0xb98f8339CD3CD50701aCdE307875B78c373e6515",
     "name":"eth",
     "StrategyName":"for"
+    },
+    {
+    "token": "0x7F70642d88cf1C4a3a7abb072B53B929b653edA5",
+    "Strategy":  "0xC49c6ee0dB9452446370e62dEBD38B35444093Ef",
+    "vault": "0x57Ea66bb8F83D09127b792FDf0af4A94fc5D6314",
+    "name":"yfii",
+    "StrategyName":"for"
     }
 ]
