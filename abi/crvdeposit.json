@@ -1,360 +1,481 @@
-[{
+[
+  {
     "name": "Deposit",
-    "inputs": [{
+    "inputs": [
+      {
         "type": "address",
         "name": "provider",
         "indexed": true
-    }, {
+      },
+      {
         "type": "uint256",
         "name": "value",
         "indexed": false
-    }],
+      }
+    ],
     "anonymous": false,
     "type": "event"
-}, {
+  },
+  {
     "name": "Withdraw",
-    "inputs": [{
+    "inputs": [
+      {
         "type": "address",
         "name": "provider",
         "indexed": true
-    }, {
+      },
+      {
         "type": "uint256",
         "name": "value",
         "indexed": false
-    }],
+      }
+    ],
     "anonymous": false,
     "type": "event"
-}, {
+  },
+  {
     "name": "UpdateLiquidityLimit",
-    "inputs": [{
+    "inputs": [
+      {
         "type": "address",
         "name": "user",
         "indexed": false
-    }, {
+      },
+      {
         "type": "uint256",
         "name": "original_balance",
         "indexed": false
-    }, {
+      },
+      {
         "type": "uint256",
         "name": "original_supply",
         "indexed": false
-    }, {
+      },
+      {
         "type": "uint256",
         "name": "working_balance",
         "indexed": false
-    }, {
+      },
+      {
         "type": "uint256",
         "name": "working_supply",
         "indexed": false
-    }],
+      }
+    ],
     "anonymous": false,
     "type": "event"
-}, {
+  },
+  {
     "outputs": [],
-    "inputs": [{
+    "inputs": [
+      {
         "type": "address",
         "name": "lp_addr"
-    }, {
+      },
+      {
         "type": "address",
         "name": "_minter"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "constructor"
-}, {
+  },
+  {
     "name": "user_checkpoint",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "bool",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "addr"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function",
     "gas": 2079152
-}, {
+  },
+  {
     "name": "claimable_tokens",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "addr"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1998318
-}, {
+  },
+  {
     "name": "kick",
     "outputs": [],
-    "inputs": [{
+    "inputs": [
+      {
         "type": "address",
         "name": "addr"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function",
     "gas": 2084532
-}, {
+  },
+  {
     "name": "set_approve_deposit",
     "outputs": [],
-    "inputs": [{
+    "inputs": [
+      {
         "type": "address",
         "name": "addr"
-    }, {
+      },
+      {
         "type": "bool",
         "name": "can_deposit"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function",
     "gas": 35766
-}, {
+  },
+  {
     "name": "deposit",
     "outputs": [],
-    "inputs": [{
+    "inputs": [
+      {
         "type": "uint256",
         "name": "_value"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
-}, {
+  },
+  {
     "name": "deposit",
     "outputs": [],
-    "inputs": [{
+    "inputs": [
+      {
         "type": "uint256",
         "name": "_value"
-    }, {
+      },
+      {
         "type": "address",
         "name": "addr"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
-}, {
+  },
+  {
     "name": "withdraw",
     "outputs": [],
-    "inputs": [{
+    "inputs": [
+      {
         "type": "uint256",
         "name": "_value"
-    }],
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function",
     "gas": 2208318
-}, {
+  },
+  {
     "name": "integrate_checkpoint",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 2297
-}, {
+  },
+  {
     "name": "minter",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "address",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1421
-}, {
+  },
+  {
     "name": "crv_token",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "address",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1451
-}, {
+  },
+  {
     "name": "lp_token",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "address",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1481
-}, {
+  },
+  {
     "name": "controller",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "address",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1511
-}, {
+  },
+  {
     "name": "voting_escrow",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "address",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1541
-}, {
+  },
+  {
     "name": "balanceOf",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1725
-}, {
+  },
+  {
     "name": "totalSupply",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1601
-}, {
+  },
+  {
     "name": "future_epoch_time",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1631
-}, {
+  },
+  {
     "name": "approved_to_deposit",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "bool",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "arg0"
-    }, {
+      },
+      {
         "type": "address",
         "name": "arg1"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1969
-}, {
+  },
+  {
     "name": "working_balances",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1845
-}, {
+  },
+  {
     "name": "working_supply",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1721
-}, {
+  },
+  {
     "name": "period",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "int128",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1751
-}, {
+  },
+  {
     "name": "period_timestamp",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "uint256",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1890
-}, {
+  },
+  {
     "name": "integrate_inv_supply",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "uint256",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1920
-}, {
+  },
+  {
     "name": "integrate_inv_supply_of",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 1995
-}, {
+  },
+  {
     "name": "integrate_checkpoint_of",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 2025
-}, {
+  },
+  {
     "name": "integrate_fraction",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
-    "inputs": [{
+      }
+    ],
+    "inputs": [
+      {
         "type": "address",
         "name": "arg0"
-    }],
+      }
+    ],
     "stateMutability": "view",
     "type": "function",
     "gas": 2055
-}, {
+  },
+  {
     "name": "inflation_rate",
-    "outputs": [{
+    "outputs": [
+      {
         "type": "uint256",
         "name": ""
-    }],
+      }
+    ],
     "inputs": [],
     "stateMutability": "view",
     "type": "function",
     "gas": 1931
-}]
+  }
+]

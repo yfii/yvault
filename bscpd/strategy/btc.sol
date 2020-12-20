@@ -1,3 +1,7 @@
+
+
+
+///////////
 contract StrategyFortube {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -27,7 +31,7 @@ contract StrategyFortube {
     address public governance;
     address public strategyDev;
     address public controller;
-    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
+    address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a; //設置燒毀帳號
 
     string public getName;
 
@@ -37,7 +41,7 @@ contract StrategyFortube {
     
     constructor(address _want) public {
         want = _want;
-        governance = tx.origin;
+        governance = msg.sender; /// msg.sender or tx.origin?
         controller = 0x5B916D02A9745C64EC6C0AFe41Ee4893Dd5a01B7;
         getName = string(
             abi.encodePacked("yfii:Strategy:", 
@@ -50,7 +54,7 @@ contract StrategyFortube {
         strategyDev = tx.origin;
     }
 
-    function doApprove () public{
+    function doApprove () public{  //設置通過 Approve 動作
         IERC20(output).safeApprove(unirouter, 0);
         IERC20(output).safeApprove(unirouter, uint(-1));
     }
@@ -59,21 +63,20 @@ contract StrategyFortube {
         require(msg.sender == governance, "!governance");
         fortube_reward = _reward;
     }    
-    function setUnirouter(address _unirouter) public {
+    function setUnirouter(address _unirouter) public {  // 設置前面設置的 Router 去販賣
         require(msg.sender == governance, "!governance");
         unirouter = _unirouter;
     }
     
     
-    function deposit() public {
+    function deposit() public {  // 將手上的BEP20進行充值
         uint _want = IERC20(want).balanceOf(address(this));
         address _controller = For(fortube).controller();
-        if (_want > 0) {
+        if (_want > 0) { //充入金額必須大於零啊
             IERC20(want).safeApprove(_controller, 0);
             IERC20(want).safeApprove(_controller, _want);
             For(fortube).deposit(want,_want);
         }
-        
     }
     
     // Controller only function for creating additional rewards from dust
@@ -81,7 +84,9 @@ contract StrategyFortube {
         require(msg.sender == controller, "!controller");
         require(want != address(_asset), "want");
         address _controller = For(fortube).controller();
+        /////////// 要求Controller 不能跟所得到的 fToken 為同一個地址  /////////// /////////// 
         require(IBankController(_controller).getFTokeAddress(want) != address(_asset),"fToken");
+        ////////////////////////////////////////////////////////////////////////////////
         balance = _asset.balanceOf(address(this));
         _asset.safeTransfer(controller, balance);
     }
@@ -129,10 +134,10 @@ contract StrategyFortube {
     
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
-        ForReward(fortube_reward).claimReward();
-        doswap();
-        dosplit();//分yfii
-        deposit();
+        ForReward(fortube_reward).claimReward();  //收割利息，將獎勵代幣賣掉
+        doswap();  // 賣, Exchange 
+        dosplit(); //分yfii
+        deposit(); 
     }
 
     function doswap() internal {
@@ -165,7 +170,7 @@ contract StrategyFortube {
         return IERC20(want).balanceOf(address(this));
     }
     
-    function balanceOfPool() public view returns (uint) {
+    function balanceOfPool() public view returns (uint) { // Pool 之中佔比
         address _controller = For(fortube).controller();
         IFToken fToken = IFToken(IBankController(_controller).getFTokeAddress(want));
         return fToken.calcBalanceOfUnderlying(address(this));
