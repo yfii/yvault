@@ -219,14 +219,14 @@ contract StrategyMushroomsUSDCV1 {
             IERC20(want).safeApprove(mmVault, 0);
             IERC20(want).safeApprove(mmVault, _want);
 			
-			uint256 _before = IERC20(mmVault).balanceOf(address(this));
+            uint256 _before = IERC20(mmVault).balanceOf(address(this));
             MMVault(mmVault).deposit(_want);						
             uint256 _mToken = IERC20(mmVault).balanceOf(address(this));
-			require(_mToken > _before, '!mismatchDeposit');
+            require(_mToken > _before, '!mismatchDeposit');
 			
             IERC20(mmVault).safeApprove(mmFarmingPool, 0);
             IERC20(mmVault).safeApprove(mmFarmingPool, _mToken);
-			MMFarmingPool(mmFarmingPool).deposit(mmFarmingPoolId, _mToken);
+            MMFarmingPool(mmFarmingPool).deposit(mmFarmingPoolId, _mToken);
         }
         
     }
@@ -274,16 +274,16 @@ contract StrategyMushroomsUSDCV1 {
 	function _convertMTokenToWant(uint256 _shares) internal view returns (uint256){
 	    uint256 _mTokenTotal = IERC20(mmVault).totalSupply();
 	    uint256 _wantInVault = MMVault(mmVault).balance();
-		return (_wantInVault.mul(_shares)).div(_mTokenTotal);
+	    return (_wantInVault.mul(_shares)).div(_mTokenTotal);
 	}
     
     function _withdrawAll() internal {
 	    (uint256 _mToken, ) = MMFarmingPool(mmFarmingPool).userInfo(mmFarmingPoolId, address(this));		
 	    uint256 _want = _convertMTokenToWant(_mToken);
-		_withdrawSome(_want);
+	    _withdrawSome(_want);
 		
-		// claim dust
-		MMFarmingPool(mmFarmingPool).withdraw(mmFarmingPoolId, 0);
+	    // claim dust
+	    MMFarmingPool(mmFarmingPool).withdraw(mmFarmingPoolId, 0);
         doswap();
         dosplit();//分yfii
         IERC20(want).safeTransfer(Controller(controller).rewards(), IERC20(want).balanceOf(address(this)));
@@ -321,15 +321,15 @@ contract StrategyMushroomsUSDCV1 {
     function _withdrawSome(uint256 _amount) internal returns (uint256) {
         require(_amount > 0, '!invalidWithdraw');
         
-	    uint256 _mRatio = MMVault(mmVault).getRatio();
-	    uint256 _share = _amount.mul(1e18).div(_mRatio);
-		MMFarmingPool(mmFarmingPool).withdraw(mmFarmingPoolId, _share);
-		require(IERC20(mmVault).balanceOf(address(this)) >= _share, '!mismatchFarmingPoolWithdraw');
+        uint256 _mRatio = MMVault(mmVault).getRatio();
+        uint256 _share = _amount.mul(1e18).div(_mRatio);
+        MMFarmingPool(mmFarmingPool).withdraw(mmFarmingPoolId, _share);
+        require(IERC20(mmVault).balanceOf(address(this)) >= _share, '!mismatchFarmingPoolWithdraw');
 		
-		uint256 _before = IERC20(want).balanceOf(address(this));
+        uint256 _before = IERC20(want).balanceOf(address(this));
         MMVault(mmVault).withdraw(_share);
-		uint256 _after = IERC20(want).balanceOf(address(this));
-		require(_after > _before, '!mismatchVaultWithdraw');// no check on mushrooms withdrawal fee
+        uint256 _after = IERC20(want).balanceOf(address(this));
+        require(_after > _before, '!mismatchVaultWithdraw');// no check on mushrooms withdrawal fee
 		
         return _after.sub(_before);
     }
@@ -340,7 +340,7 @@ contract StrategyMushroomsUSDCV1 {
     
     function balanceOfPool() public view returns (uint256) {
         (uint256 _mToken, ) = MMFarmingPool(mmFarmingPool).userInfo(mmFarmingPoolId, address(this));
-		return _convertMTokenToWant(_mToken);
+        return _convertMTokenToWant(_mToken);
     }
     
     
