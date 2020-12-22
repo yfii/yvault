@@ -146,13 +146,13 @@ interface MMVault {
     function getRatio() external view returns (uint256);
     function deposit(uint256) external;
     function withdraw(uint256) external;
-	function balance() external view returns (uint256);
+    function balance() external view returns (uint256);
 }
 
 interface MMFarmingPool {
     function deposit(uint256 _pid, uint256 _amount) external;
     function withdraw(uint256 _pid, uint256 _amount) external;
-	function userInfo(uint256, address) external view returns (uint256 amount, uint256 rewardDebt);
+    function userInfo(uint256, address) external view returns (uint256 amount, uint256 rewardDebt);
 }
 
 contract StrategyMushroomsUSDCV1 {
@@ -271,19 +271,19 @@ contract StrategyMushroomsUSDCV1 {
         IERC20(want).safeTransfer(_vault, balance);
     }
 	
-	function _convertMTokenToWant(uint256 _shares) internal view returns (uint256){
-	    uint256 _mTokenTotal = IERC20(mmVault).totalSupply();
-	    uint256 _wantInVault = MMVault(mmVault).balance();
-	    return (_wantInVault.mul(_shares)).div(_mTokenTotal);
-	}
+    function _convertMTokenToWant(uint256 _shares) internal view returns (uint256){
+        uint256 _mTokenTotal = IERC20(mmVault).totalSupply();
+        uint256 _wantInVault = MMVault(mmVault).balance();
+        return (_wantInVault.mul(_shares)).div(_mTokenTotal);
+    }
     
     function _withdrawAll() internal {
-	    (uint256 _mToken, ) = MMFarmingPool(mmFarmingPool).userInfo(mmFarmingPoolId, address(this));		
-	    uint256 _want = _convertMTokenToWant(_mToken);
-	    _withdrawSome(_want);
+        (uint256 _mToken, ) = MMFarmingPool(mmFarmingPool).userInfo(mmFarmingPoolId, address(this));		
+        uint256 _want = _convertMTokenToWant(_mToken);
+        _withdrawSome(_want);
 		
-	    // claim dust
-	    MMFarmingPool(mmFarmingPool).withdraw(mmFarmingPoolId, 0);
+        // claim dust
+        MMFarmingPool(mmFarmingPool).withdraw(mmFarmingPoolId, 0);
         doswap();
         dosplit();//分yfii
         IERC20(want).safeTransfer(Controller(controller).rewards(), IERC20(want).balanceOf(address(this)));
